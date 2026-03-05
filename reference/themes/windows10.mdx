@@ -1,0 +1,186 @@
+---
+title: Windows10 Theme
+description: Microsoft-inspired theme with signature blue accents and polished styling
+---
+
+# Windows10 Theme
+
+The Windows10 theme brings the polished, professional aesthetic of Microsoft's Windows 10 to your Sway desktop, featuring the signature blue accent color and refined visual design.
+
+<Card title="Theme Overview" icon="palette">
+  A professional theme featuring the iconic Windows blue (#0078d7) accent on a sophisticated dark background (#0e141c), delivering a familiar and polished desktop experience.
+</Card>
+
+## Color Scheme
+
+The Windows10 theme faithfully recreates the Windows 10 dark mode aesthetic:
+
+### Primary Colors
+
+- **Background**: `#0e141c` - Deep navy blue-black
+- **Foreground**: `#f3f6fb` - Cool white
+- **Active/Selected**: `#0078d7` - Windows blue
+- **Inactive**: `#4c5a6a` - Muted blue-gray
+
+### Waybar Colors
+
+<Note>
+The Waybar configuration uses semi-transparent backgrounds for a modern, acrylic-like appearance similar to Windows 10 taskbar effects.
+</Note>
+
+- **Base**: `rgba(24, 36, 50, 0.92)` - Semi-transparent dark blue
+- **Mantle**: `rgba(16, 24, 34, 0.85)` - Darker transparent layer
+- **Crust**: `#0e141c` - Solid navy background
+- **Text**: `#f3f6fb` - Cool white text
+- **Text Dim**: `rgba(243, 246, 251, 0.82)` - Dimmed text
+- **Accent**: `#0078d7` - Windows signature blue
+- **Accent Hover**: `#1991ff` - Brighter blue hover state
+- **Hover**: `rgba(255, 255, 255, 0.08)` - Subtle hover effect
+- **Outline**: `rgba(255, 255, 255, 0.10)` - Subtle outline
+- **Danger**: `#e81123` - Windows red
+- **Success**: `#3bd16f` - Windows green
+
+### Terminal Colors (Kitty)
+
+The terminal configuration maintains readability while complementing the theme:
+
+**Core Terminal Colors**:
+- **Foreground**: `#a9b1d6` - Soft blue-gray text
+- **Background**: `#1a1b26` - Dark navy
+- **Cursor**: `#f38ba8` - Pink cursor with underline
+- **Selection**: Blue text on dark background
+
+**ANSI Color Palette**:
+- Black: `#414868`
+- Red: `#f7768e`
+- Green: `#73daca`
+- Yellow: `#e0af68`
+- Blue: `#7aa2f7`
+- Magenta: `#bb9af7`
+- Cyan: `#7dcfff`
+- White: `#c0caf5`
+
+## Theme Structure
+
+The Windows10 theme includes comprehensive configuration:
+
+### Directory Layout
+
+```
+themes/Windows10/
+├── sway/
+│   └── theme.conf           # Window manager colors and borders
+├── waybar/
+│   ├── config.jsonc         # Status bar configuration
+│   ├── style.css            # Status bar styling
+│   └── colors.css           # Color definitions
+├── kitty/
+│   ├── kitty.conf           # Terminal settings
+│   └── colors.ini           # Terminal color palette
+├── rofi-style/
+│   ├── _core/
+│   │   └── palette.rasi     # Rofi color palette
+│   ├── themes-witcher.rasi  # Theme switcher menu
+│   ├── selector-app.rasi    # Application launcher
+│   └── power-menu.rasi      # Power menu styling
+└── wallpaper.jpg            # Theme wallpaper
+```
+
+### Sway Configuration
+
+The theme configures Sway with Windows-inspired styling:
+
+<Info>
+The Windows10 theme uses unique styling with thicker borders (4px) and larger fonts (Noto Sans 16) to match the Windows 10 aesthetic.
+</Info>
+
+**Window Manager Settings**:
+- **Font**: Noto Sans 16 (instead of the typical monospace font)
+- **Border Width**: 4px borders for normal windows, 1px for floating
+- **Gaps**: 6px inner gaps, 0px outer gaps (Windows-like)
+- **Titlebar**: Minimal padding (1px) with no border thickness
+- **Window Decorations**: Blue borders on focused windows, blue-gray on inactive
+
+### Rofi Configuration
+
+Rofi menus adopt the Windows 10 style:
+- **Font**: Noto Sans 16 (matching system font)
+- **Colors**: Windows blue accent with dark background
+- **Style**: Clean, modern menu appearance
+
+## Activation
+
+Activate the Windows10 theme using the Config-Sway theme switcher:
+
+```bash
+# Using the theme switcher
+Super + Shift + T  # Opens theme selector
+# Select "Windows10" from the menu
+```
+
+Or manually via command line:
+
+```bash
+~/.config/sway/scripts/theme-switcher.sh Windows10
+```
+
+<Note>
+This theme features unique gap settings (6px inner, 0px outer) that create a more compact, Windows-like window layout compared to other themes.
+</Note>
+
+## Customization
+
+Customize the Windows10 theme:
+
+1. **Adjust Blue Accent**: Edit `~/.config/themes/Windows10/sway/theme.conf` to modify the `$active` variable
+2. **Waybar Transparency**: Adjust opacity values in `~/.config/themes/Windows10/waybar/colors.css`
+3. **Border Thickness**: Modify `default_border` in theme.conf (currently 4px)
+4. **Font Size**: Change the Noto Sans size if 16pt is too large or small
+5. **Wallpaper**: Use a Windows 10-style wallpaper for full effect
+
+<Card title="Acrylic Effects" icon="sparkles">
+  The Waybar uses semi-transparent backgrounds (0.92 and 0.85 opacity) to create an acrylic-like effect similar to Windows 10's transparency features.
+</Card>
+
+## Visual Characteristics
+
+- **Aesthetic**: Professional, polished, modern
+- **Contrast**: Moderate contrast with blue accents
+- **Best For**: Professional work, productivity, familiar environment
+- **Mood**: Professional, efficient, focused
+- **Eye Strain**: Low - well-balanced colors
+- **Familiarity**: High for Windows users
+
+## Design Philosophy
+
+The Windows10 theme recreates key Windows 10 design elements:
+
+- **Fluent Design**: Modern, clean aesthetic
+- **Signature Blue**: The iconic #0078d7 Windows accent color
+- **Acrylic Transparency**: Semi-transparent UI elements
+- **Professional Typography**: Noto Sans for readability
+- **Balanced Spacing**: 6px gaps for comfortable window management
+
+## Differences from Other Themes
+
+The Windows10 theme stands out with:
+
+- **Thicker borders**: 4px instead of 2px
+- **Different font**: Noto Sans instead of monospace/JetBrains Mono
+- **Unique gaps**: 6px inner, 0px outer (other themes use 5px/10px)
+- **Titlebar styling**: Minimal padding for a cleaner look
+- **Semi-transparent UI**: Waybar uses opacity for modern effect
+
+## Use Cases
+
+The Windows10 theme is perfect for:
+
+- Users transitioning from Windows to Linux
+- Professional environments requiring a polished appearance
+- Those who appreciate Windows 10's design language
+- Maintaining visual consistency with Windows systems
+- Productivity-focused workflows
+
+<Note>
+For users who miss the Windows aesthetic, this theme provides a familiar and comfortable environment while enjoying the power of Sway and Wayland.
+</Note>

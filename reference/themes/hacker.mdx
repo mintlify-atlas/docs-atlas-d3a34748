@@ -1,0 +1,145 @@
+---
+title: Hacker Theme
+description: Classic terminal aesthetic with green-on-black color scheme
+---
+
+# Hacker Theme
+
+The Hacker theme recreates the iconic green terminal aesthetic, bringing a classic retro computing feel to your modern Sway desktop.
+
+<Card title="Theme Overview" icon="palette">
+  A nostalgic theme featuring bright green (#a6e3a1) text on a dark background (#212121), reminiscent of vintage CRT terminals and classic hacker movies.
+</Card>
+
+## Color Scheme
+
+The Hacker theme embraces the timeless green-on-black terminal aesthetic:
+
+### Primary Colors
+
+- **Background**: `#212121` - Charcoal gray (terminal black)
+- **Foreground**: `#a6e3a1` - Bright matrix green
+- **Active/Selected**: `#a6e3a1` - Vibrant green highlight
+- **Inactive**: `#45475a` - Muted gray
+
+### Waybar Colors
+
+- **Base**: `rgb(33, 33, 33)` - Dark terminal background
+- **Mantle**: `#131313` - Deeper black layer
+- **Crust**: `#11111b` - Nearly pure black
+- **Text**: `#a6e3a1` - Matrix green text
+- **Mauve**: `#a6e3a1` - Green accent
+- **Sky**: `#89dceb` - Cyan for special indicators
+- **Red**: `#f38ba8` - Error indicator
+- **Green**: `#a6e3a1` - Primary theme color
+
+### Terminal Colors (Kitty)
+
+The terminal configuration stays true to the hacker aesthetic:
+
+<Note>
+The Kitty terminal uses bright green foreground text (#a6e3a1) on a dark charcoal background (#212121), creating the authentic terminal experience.
+</Note>
+
+**Core Terminal Colors**:
+- **Foreground**: `#a6e3a1` - Bright green text
+- **Background**: `#212121` - Charcoal black
+- **Cursor**: `#a6e3a1` with underline style
+- **Selection**: Dark text on light green background (`#d8edd6`)
+
+**ANSI Color Palette**:
+- Black: `#414868`
+- Red: `#f7768e`
+- Green: `#73daca`
+- Yellow: `#e0af68`
+- Blue: `#7aa2f7`
+- Magenta: `#bb9af7`
+- Cyan: `#7dcfff`
+- White: `#c0caf5`
+
+## Theme Structure
+
+The Hacker theme includes complete configuration files:
+
+### Directory Layout
+
+```
+themes/Hacker/
+├── sway/
+│   └── theme.conf           # Window manager colors and borders
+├── waybar/
+│   ├── config.jsonc         # Status bar configuration
+│   ├── style.css            # Status bar styling
+│   └── colors.css           # Color definitions
+├── kitty/
+│   ├── kitty.conf           # Terminal settings
+│   └── colors.ini           # Terminal color palette
+├── rofi-style/
+│   ├── _core/
+│   │   └── palette.rasi     # Rofi color palette
+│   ├── theme-switcher.rasi  # Theme switcher menu
+│   ├── selector-app.rasi    # Application launcher
+│   └── power-menu.rasi      # Power menu styling
+└── wallpaper.jpg            # Theme wallpaper
+```
+
+### Sway Configuration
+
+The theme configures Sway with hacker-style visuals:
+
+- **Border Width**: 2px borders for both normal and floating windows
+- **Gaps**: 5px inner gaps, 10px outer gaps
+- **Window Decorations**: Green borders on focused windows, gray on inactive
+- **Visual Style**: Terminal-inspired window decorations
+
+### Rofi Configuration
+
+<Info>
+Rofi menus adopt the green terminal aesthetic using JetBrains Mono Nerd Font at 14pt, creating consistent matrix-style menus throughout the system.
+</Info>
+
+## Activation
+
+Activate the Hacker theme using the Config-Sway theme switcher:
+
+```bash
+# Using the theme switcher
+Super + Shift + T  # Opens theme selector
+# Select "Hacker" from the menu
+```
+
+Or manually via command line:
+
+```bash
+~/.config/sway/scripts/theme-switcher.sh Hacker
+```
+
+<Note>
+The theme applies immediately to Sway, Waybar, and Rofi. Terminal applications should be restarted to display the full green color scheme.
+</Note>
+
+## Customization
+
+Personalize the Hacker theme:
+
+1. **Adjust Green Shade**: Edit `~/.config/themes/Hacker/sway/theme.conf` to modify the `$fg` and `$active` variables
+2. **Waybar Styling**: Customize `~/.config/themes/Hacker/waybar/colors.css` for status bar appearance
+3. **Terminal Green**: Fine-tune `~/.config/themes/Hacker/kitty/colors.ini` for your preferred shade of green
+4. **Background**: Replace `~/.config/themes/Hacker/wallpaper.jpg` with cyberpunk or matrix-style imagery
+
+<Card title="Nostalgia Factor" icon="terminal">
+  The Hacker theme pays homage to the golden age of computing, when green phosphor CRT displays were the primary interface to powerful systems.
+</Card>
+
+## Visual Characteristics
+
+- **Aesthetic**: Retro terminal, cyberpunk, matrix-inspired
+- **Contrast**: High contrast green on black
+- **Best For**: Terminal work, coding, cybersecurity tasks
+- **Mood**: Focused, nostalgic, technical
+- **Eye Strain**: Moderate - bright green may cause fatigue in extended use
+- **Readability**: Excellent in low-light environments
+
+## Historical Context
+
+The green-on-black color scheme originates from early computer terminals that used monochrome phosphor displays. This theme recreates that aesthetic for modern systems while maintaining excellent readability and a distinctive appearance.

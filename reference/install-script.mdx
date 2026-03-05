@@ -1,0 +1,232 @@
+---
+title: install.sh
+description: Dependency installer for Config-Sway on Arch Linux
+---
+
+## Overview
+
+The `install.sh` script is a dependency installer specifically designed for Config-Sway on Arch Linux systems using `pacman`. It installs all required packages for the Sway window manager environment and then automatically runs the `update.sh` script to apply the configuration files.
+
+<Warning>
+This script is designed for **Arch Linux** and uses `pacman` as the package manager. It will skip package installation on other distributions.
+</Warning>
+
+## Location
+
+```bash
+./install.sh
+```
+
+Located in the root directory of the Config-Sway repository.
+
+## Usage
+
+```bash
+./install.sh
+```
+
+The script requires no arguments or options. It will:
+1. Check if `pacman` is available
+2. Install required packages using `sudo pacman -S --needed`
+3. Automatically execute `update.sh` to apply dotfiles
+
+## What It Does
+
+### Step-by-Step Execution
+
+1. **Repository Detection**
+   - Determines the repository directory using `BASH_SOURCE`
+   - Sets `REPO_DIR` for locating other scripts
+
+2. **Package Installation**
+   - Checks if `pacman` is available
+   - Verifies `sudo` access
+   - Installs all packages from the predefined list using `--needed` flag (skips already installed packages)
+
+3. **Automatic Configuration**
+   - Locates and executes `update.sh` to apply dotfiles
+   - Handles both executable and non-executable `update.sh` files
+
+### Installed Packages
+
+The script installs the following package categories:
+
+#### Window Manager & Environment
+<ParamField path="sway" type="package">
+  Tiling Wayland compositor
+</ParamField>
+
+<ParamField path="swaybg" type="package">
+  Wallpaper utility for Wayland
+</ParamField>
+
+<ParamField path="waybar" type="package">
+  Highly customizable status bar
+</ParamField>
+
+<ParamField path="mako" type="package">
+  Notification daemon for Wayland
+</ParamField>
+
+<ParamField path="kitty" type="package">
+  GPU-accelerated terminal emulator
+</ParamField>
+
+<ParamField path="rofi" type="package">
+  Application launcher and window switcher
+</ParamField>
+
+<ParamField path="flameshot" type="package">
+  Screenshot tool
+</ParamField>
+
+<ParamField path="network-manager-applet" type="package">
+  Network management GUI
+</ParamField>
+
+#### Wayland Portals & Capture
+<ParamField path="xdg-desktop-portal" type="package">
+  Desktop integration framework
+</ParamField>
+
+<ParamField path="xdg-desktop-portal-wlr" type="package">
+  Wayland portal backend
+</ParamField>
+
+<ParamField path="xdg-desktop-portal-gtk" type="package">
+  GTK portal implementation
+</ParamField>
+
+<ParamField path="grim" type="package">
+  Screenshot utility for Wayland
+</ParamField>
+
+#### Synchronization
+<ParamField path="rsync" type="package">
+  File synchronization tool (required by update.sh)
+</ParamField>
+
+#### System Utilities
+<ParamField path="brightnessctl" type="package">
+  Brightness control utility
+</ParamField>
+
+<ParamField path="playerctl" type="package">
+  Media player controller
+</ParamField>
+
+<ParamField path="blueman" type="package">
+  Bluetooth manager
+</ParamField>
+
+<ParamField path="swaylock" type="package">
+  Screen locker for Wayland
+</ParamField>
+
+#### Terminal & User Experience
+<ParamField path="ranger" type="package">
+  Console file manager
+</ParamField>
+
+<ParamField path="lsd" type="package">
+  Modern ls replacement
+</ParamField>
+
+<ParamField path="bat" type="package">
+  Cat clone with syntax highlighting
+</ParamField>
+
+<ParamField path="fastfetch" type="package">
+  System information tool
+</ParamField>
+
+#### Audio & Notifications
+<ParamField path="mpc" type="package">
+  Music Player Daemon client
+</ParamField>
+
+<ParamField path="alsa-utils" type="package">
+  ALSA utilities
+</ParamField>
+
+<ParamField path="libnotify" type="package">
+  Desktop notification library
+</ParamField>
+
+## Error Handling
+
+### No sudo Available
+If `sudo` is not installed, the script will display a warning and skip package installation:
+
+```
+Aviso: no existe sudo; se omite instalación de paquetes.
+```
+
+### sudo Requires Password
+If `sudo` requires password authentication that cannot be satisfied non-interactively:
+
+```
+Aviso: sudo requiere contraseña. Ejecuta manualmente:
+  sudo pacman -S --needed [packages...]
+```
+
+### Non-Arch Systems
+If `pacman` is not available (non-Arch systems):
+
+```
+Aviso: pacman no está disponible, se omite instalación de paquetes.
+```
+
+## Exit Codes
+
+The script uses `set -euo pipefail` for strict error handling:
+- **0**: Success (all packages installed and update.sh executed)
+- **Non-zero**: Error during package installation or update.sh execution
+
+## Examples
+
+### Standard Installation
+
+```bash
+cd ~/Config-Sway
+./install.sh
+```
+
+Output:
+```
+Instalando paquetes necesarios con pacman (sudo pacman -S --needed)...
+[...package installation output...]
+Dependencias listas.
+Para aplicar los dotfiles: /home/user/Config-Sway/update.sh
+Ejecutando update.sh...
+[...update.sh output...]
+```
+
+### Manual Package Installation
+
+If you need to install packages manually:
+
+```bash
+sudo pacman -S --needed sway swaybg waybar mako kitty rofi \
+  flameshot network-manager-applet xdg-desktop-portal \
+  xdg-desktop-portal-wlr xdg-desktop-portal-gtk grim rsync \
+  brightnessctl playerctl blueman swaylock ranger lsd bat \
+  fastfetch mpc alsa-utils libnotify
+```
+
+## Related Scripts
+
+- [`update.sh`](/reference/update-script) - Synchronizes configuration files (automatically called by install.sh)
+
+## Notes
+
+- The `--needed` flag ensures pacman only installs packages that are not already present
+- The script automatically detects its own location, so it can be run from any directory
+- After package installation, `update.sh` is automatically executed to complete the setup
+- Script uses strict error handling (`set -euo pipefail`) to catch issues early
+
+## Source Code
+
+View the full source: `install.sh` (62 lines)
+
+Author: Fravelz

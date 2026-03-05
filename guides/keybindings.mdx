@@ -1,0 +1,233 @@
+---
+title: Keybindings Reference
+description: Complete keyboard shortcuts reference for Config-Sway
+icon: keyboard
+---
+
+# Keybindings Reference
+
+This page provides a complete reference of all keyboard shortcuts configured in Config-Sway. The configuration uses Vim-style HJKL navigation keys for consistency and efficiency.
+
+## Key Legend
+
+| Key | Meaning |
+|-----|----------|
+| `Super` | Windows key (Mod4) |
+| `Shift` | Shift key |
+| `Ctrl` | Control key |
+| `Alt` | Alt key (Mod1) |
+| `H/J/K/L` | Left/Down/Up/Right (Vim-style) |
+
+<Tip>
+The modifier key `$mod` is set to `Mod4` (Super/Windows key) by default. All keybindings use this as the primary modifier.
+</Tip>
+
+## Application Launchers
+
+Quick access to frequently used applications:
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `Super+Enter` | Launch Kitty | Opens the Kitty terminal emulator |
+| `Super+F` | Launch Firefox | Opens Firefox web browser |
+| `Super+Z` | Flameshot GUI | Opens Flameshot screenshot tool in GUI mode |
+
+## Rofi Menus
+
+Config-Sway includes several Rofi-based menus for quick access to common tasks:
+
+| Keybinding | Menu | Script Location |
+|------------|------|----------------|
+| `Super+D` | App launcher | `~/.config/rofi/scripts/selector-app.sh` |
+| `Super+Q` | Power menu | `~/.config/rofi/scripts/power-menu.sh` |
+| `Super+A` | Theme switcher | `~/.config/rofi/scripts/theme-switcher.sh` |
+| `Super+W` | Wallpaper switcher | `~/.config/rofi/scripts/wallpaper-switcher.sh` |
+| `Super+E` | Icon/emoji menu | `~/.config/rofi/scripts/menu-iconos.sh` |
+| `Super+Shift+Enter` | Hacker mode layout | `~/.config/scripts/mode-hacker.sh` |
+
+<Tip>
+**Hacker Mode** creates a custom terminal layout with:
+- Left pane: Main terminal shell
+- Top right: `tty-clock` displaying time
+- Bottom right: `cava` audio visualizer
+</Tip>
+
+## Window Management
+
+Control windows and their behavior:
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `Super+C` | Kill window | Close the focused window |
+| `Super+O` | Toggle split layout | Switch between horizontal and vertical splits |
+| `Super+Shift+R` | Reload config | Reload Sway configuration |
+| `Super+Button3` | Toggle floating | Right-click with Super to toggle floating mode |
+
+<Warning>
+The keybindings for floating toggle (`Super+U`), fullscreen (`Super+P`), and exit (`Super+M`) are commented out in the default config. Uncomment line 17 in `~/.config/sway/config` if you need these.
+</Warning>
+
+## Focus Navigation (Vim-style)
+
+Move focus between windows using Vim-style HJKL keys:
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super+H` | Focus left |
+| `Super+J` | Focus down |
+| `Super+K` | Focus up |
+| `Super+L` | Focus right |
+
+## Moving Floating Windows
+
+Two modes for moving floating windows with different step sizes:
+
+### Small Movements (50px)
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super+Shift+H` | Move left 50px |
+| `Super+Shift+J` | Move down 50px |
+| `Super+Shift+K` | Move up 50px |
+| `Super+Shift+L` | Move right 50px |
+
+### Large Movements (150px)
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super+Alt+H` | Move left 150px |
+| `Super+Alt+J` | Move down 150px |
+| `Super+Alt+K` | Move up 150px |
+| `Super+Alt+L` | Move right 150px |
+
+## Resizing Floating Windows
+
+Resize floating windows in 50px increments:
+
+| Keybinding | Action |
+|------------|--------|
+| `Super+Ctrl+H` | Shrink width (left) |
+| `Super+Ctrl+L` | Grow width (right) |
+| `Super+Ctrl+J` | Shrink height (down) |
+| `Super+Ctrl+K` | Grow height (up) |
+
+## Workspace Management
+
+### Switching Workspaces
+
+| Keybinding | Action |
+|------------|--------|
+| `Super+1` to `Super+9` | Switch to workspace 1-9 |
+| `Super+0` | Switch to workspace 10 |
+| `Super+S` | Switch to "magic" workspace |
+
+### Moving Windows to Workspaces
+
+| Keybinding | Action |
+|------------|--------|
+| `Super+Shift+1` to `Super+Shift+9` | Move window to workspace 1-9 |
+| `Super+Shift+0` | Move window to workspace 10 |
+| `Super+Shift+S` | Move window to "magic" workspace |
+
+<Tip>
+The **"magic" workspace** is a special workspace accessible via `Super+S`. Use it as a scratchpad or temporary workspace for windows you want to access quickly.
+</Tip>
+
+### Workspace Navigation with Mouse
+
+| Keybinding | Action |
+|------------|--------|
+| `Super+Scroll Up` | Next workspace |
+| `Super+Scroll Down` | Previous workspace |
+
+## Mouse Bindings
+
+Enhance window management with mouse gestures:
+
+| Keybinding | Action |
+|------------|--------|
+| `Super+Left Click` | Move window (drag) |
+| `Super+Middle Click` | Resize window (drag) |
+| `Super+Right Click` | Toggle floating mode |
+
+## Multimedia Keys
+
+### Audio Control
+
+Control system audio with dedicated multimedia keys:
+
+| Key | Action | Command |
+|-----|--------|--------|
+| `XF86AudioRaiseVolume` | Increase volume | `wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+` |
+| `XF86AudioLowerVolume` | Decrease volume | `wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-` |
+| `XF86AudioMute` | Toggle mute | `wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle` |
+| `XF86AudioMicMute` | Toggle mic mute | `wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle` |
+
+<Tip>
+Audio controls use `wpctl` (WirePlumber) with a volume limit of 100% (`-l 1`) to prevent accidental audio damage.
+</Tip>
+
+### Brightness Control
+
+| Key | Action | Command |
+|-----|--------|--------|
+| `XF86MonBrightnessUp` | Increase brightness | `brightnessctl -e 4 -n 2 set 5%+` |
+| `XF86MonBrightnessDown` | Decrease brightness | `brightnessctl -e 4 -n 2 set 5%-` |
+
+<Tip>
+Brightness control uses exponential scaling (`-e 4`) and maintains a minimum value (`-n 2`) for better control at low brightness levels.
+</Tip>
+
+### Media Playback
+
+Control media playback with `playerctl`:
+
+| Key | Action | Command |
+|-----|--------|--------|
+| `XF86AudioNext` | Next track | `playerctl next` |
+| `XF86AudioPrev` | Previous track | `playerctl previous` |
+| `XF86AudioPlay` | Play/Pause | `playerctl play-pause` |
+| `XF86AudioPause` | Play/Pause | `playerctl play-pause` |
+
+## Notification Control (Mako)
+
+Manage notifications with Mako:
+
+| Keybinding | Action | Command |
+|------------|--------|--------|
+| `Super+N` | Dismiss all notifications | `makoctl dismiss -a` |
+| `Super+Shift+N` | Toggle Do Not Disturb mode | `makoctl mode -a dnd` |
+
+## Input Configuration
+
+The following input settings are configured in `~/.config/sway/config:140-148`:
+
+### Keyboard
+
+- **Layouts**: US and Latin American (`us,latam`)
+- **Layout switching**: `Alt+Shift` toggles between layouts
+
+### Touchpad
+
+- **Tap to click**: Enabled
+- **Natural scrolling**: Disabled
+
+<Tip>
+You can customize input settings by modifying the `input` blocks in `~/.config/sway/config`. See the [Sway input documentation](https://man.archlinux.org/man/sway-input.5) for all available options.
+</Tip>
+
+## Autostart Programs
+
+These programs launch automatically when Sway starts:
+
+| Program | Purpose | Configuration |
+|---------|---------|---------------|
+| `setwallpaper.sh` | Sets wallpaper | `~/.config/scripts/setwallpaper.sh` |
+| `nm-applet` | Network Manager tray | System tray applet |
+| `waybar` | Status bar | `~/.config/waybar/config-sway.jsonc` |
+| `mako` | Notification daemon | `~/.config/mako/config` |
+| `autostart.sh` | Custom autostart apps | `~/.config/scripts/autostart.sh` |
+
+<Warning>
+The `autostart.sh` script automatically launches Firefox (workspace 1), VSCode (workspace 2), and Kitty (workspace 3) on startup. Comment out lines in `~/.config/scripts/autostart.sh` if you don't want these applications to start automatically.
+</Warning>

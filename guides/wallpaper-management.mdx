@@ -1,0 +1,369 @@
+---
+title: Wallpaper Management
+description: Managing and customizing wallpapers in Config-Sway
+icon: image
+---
+
+# Wallpaper Management
+
+Config-Sway provides a flexible wallpaper system with both automatic theme-based wallpapers and manual wallpaper selection. Wallpapers are managed using `swaybg`, a Wayland-native background manager.
+
+## Quick Start
+
+Press `Super+W` to open the wallpaper switcher and select from available wallpapers.
+
+## Wallpaper System Overview
+
+Config-Sway uses a three-tier wallpaper system:
+
+1. **Saved wallpaper**: Path stored in `~/.config/sway/wallpaper`
+2. **Fallback wallpaper**: `~/.config/wallpapers/arch-linux-logo.webp`
+3. **Solid color**: `#1e1e2e` (dark background)
+
+The system automatically uses the first available option in this order.
+
+## Wallpaper Directory Structure
+
+```
+~/.config/wallpapers/           # User wallpaper collection
+├── *.jpg                       # JPEG wallpapers
+├── *.png                       # PNG wallpapers
+└── *.webp                      # WebP wallpapers
+
+~/.config/themes/<theme>/
+└── wallpaper.(jpg|png|webp)   # Theme-specific wallpaper
+
+~/.config/sway/wallpaper        # Current wallpaper path (text file)
+```
+
+## Using the Wallpaper Switcher
+
+### Interactive Selection
+
+The wallpaper switcher (`~/.config/rofi/scripts/wallpaper-switcher.sh`) provides a visual menu:
+
+```bash
+# Open wallpaper menu (or press Super+W)
+~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+<Tip>
+The wallpaper switcher displays thumbnail previews in Rofi, making it easy to identify wallpapers before applying them.
+</Tip>
+
+### How It Works
+
+1. **Scans wallpapers**: Reads all image files from `~/.config/wallpapers/`
+2. **Displays menu**: Shows wallpapers with icon previews in Rofi
+3. **Saves selection**: Writes chosen wallpaper path to `~/.config/sway/wallpaper`
+4. **Applies wallpaper**: Kills existing `swaybg` process and starts new one
+5. **Sends notification**: Displays notification with wallpaper thumbnail
+
+## Automatic Wallpaper Loading
+
+The `setwallpaper.sh` script runs automatically on Sway startup:
+
+```bash
+# Called from ~/.config/sway/config:154
+exec_always ~/.config/scripts/setwallpaper.sh
+```
+
+### Wallpaper Selection Logic
+
+From `~/.config/scripts/setwallpaper.sh:3-18`:
+
+```bash
+# 1. Try saved wallpaper path
+W="$(cat ~/.config/sway/wallpaper 2>/dev/null || true)"
+if [ -n "$W" ] && [ -f "$W" ]; then
+    swaybg -i "$W" -m fill &
+
+# 2. Try fallback wallpaper
+elif [ -f ~/.config/wallpapers/arch-linux-logo.webp ]; then
+    swaybg -i ~/.config/wallpapers/arch-linux-logo.webp -m fill &
+
+# 3. Use solid color
+else
+    swaybg -c "#1e1e2e" &
+fi
+```
+
+<Tip>
+The script automatically kills any existing `swaybg` instances before applying the new wallpaper, preventing multiple background processes.
+</Tip>
+
+## Adding Custom Wallpapers
+
+### Method 1: Using Wallpaper Directory
+
+1. Copy your wallpaper to the wallpapers directory:
+
+```bash
+cp /path/to/your-wallpaper.jpg ~/.config/wallpapers/
+```
+
+2. Open the wallpaper switcher with `Super+W` and select your wallpaper.
+
+### Method 2: Command Line
+
+Set a wallpaper directly from the command line:
+
+```bash
+# Save wallpaper path
+echo "/path/to/wallpaper.jpg" > ~/.config/sway/wallpaper
+
+# Apply immediately
+killall swaybg
+swaybg -i /path/to/wallpaper.jpg -m fill &
+```
+
+### Supported Formats
+
+Config-Sway supports these image formats for wallpapers:
+
+- **JPEG** (`.jpg`, `.jpeg`)
+- **PNG** (`.png`)
+- **WebP** (`.webp`)
+
+<Warning>
+Avoid using extremely high-resolution wallpapers (>4K) as they may impact system performance, especially on systems with limited RAM or older GPUs.
+</Warning>
+
+## swaybg Display Modes
+
+The wallpaper system uses `swaybg -m fill` by default, but you can use other modes:
+
+| Mode | Description |
+|------|-------------|
+| `fill` | Scale to fill entire display, cropping if needed (default) |
+| `fit` | Scale to fit within display, maintaining aspect ratio |
+| `stretch` | Stretch to fill display, ignoring aspect ratio |
+| `center` | Display at original size, centered |
+| `tile` | Tile image to fill display |
+
+### Changing Display Mode
+
+Edit `~/.config/scripts/setwallpaper.sh:9` to change the mode:
+
+```bash
+# Change from fill to fit
+swaybg -i "$W" -m fit &
+```
+
+## Theme-Based Wallpapers
+
+When you switch themes using `Super+A`, the theme's wallpaper is automatically applied:
+
+```bash
+# Theme wallpaper locations
+~/.config/themes/Anime/wallpaper.jpg
+~/.config/themes/Batman/wallpaper.jpg
+~/.config/themes/Hacker/wallpaper.jpg
+# etc...
+```
+
+The theme switcher:
+1. Looks for `wallpaper.(jpg|png|webp)` in the theme directory
+2. Saves the path to `~/.config/sway/wallpaper`
+3. Applies it with `swaybg -i <path> -m fill`
+
+<Tip>
+You can customize a theme's wallpaper by replacing its `wallpaper.*` file with your preferred image, keeping the same filename and extension.
+</Tip>
+
+## Multi-Monitor Setup
+
+For multi-monitor setups, `swaybg` applies the same wallpaper to all displays by default. To set different wallpapers per output:
+
+### Method 1: Multiple swaybg Instances
+
+```bash
+# Edit ~/.config/scripts/setwallpaper.sh
+# Replace single swaybg command with:
+
+swaybg -o DP-1 -i ~/.config/wallpapers/monitor1.jpg -m fill &
+swaybg -o HDMI-A-1 -i ~/.config/wallpapers/monitor2.jpg -m fill &
+```
+
+### Method 2: Advanced Configuration
+
+Create a custom wallpaper script:
+
+```bash
+#!/bin/bash
+# ~/.config/scripts/setwallpaper-multi.sh
+
+killall swaybg 2>/dev/null || true
+
+# Get output names with: swaymsg -t get_outputs
+swaybg -o "DP-1" -i ~/.config/wallpapers/left-monitor.jpg -m fill &
+swaybg -o "HDMI-A-1" -i ~/.config/wallpapers/right-monitor.jpg -m fill &
+```
+
+Then modify `~/.config/sway/config:154` to use your custom script:
+
+```bash
+exec_always ~/.config/scripts/setwallpaper-multi.sh
+```
+
+<Tip>
+Find your output names with: `swaymsg -t get_outputs | grep name`
+</Tip>
+
+## Wallpaper Script Integration
+
+The wallpaper system integrates with other Config-Sway components:
+
+### Theme Switcher Integration
+
+From `~/.config/rofi/scripts/theme-switcher.sh:154-173`:
+
+```bash
+# Theme switcher checks for wallpaper in theme directory
+for ext in jpg png webp; do
+  if [ -f "$ELEGIDO/wallpaper.$ext" ]; then
+    WALL="$ELEGIDO/wallpaper.$ext"
+    break
+  fi
+done
+
+# Saves path and applies wallpaper
+printf '%s\n' "$WALL" > ~/.config/sway/wallpaper
+swaybg -i "$WALL" -m fill &
+```
+
+### Sway Reload Behavior
+
+The `setwallpaper.sh` script uses `exec_always`, meaning it runs:
+- On Sway startup
+- Every time you reload Sway config (`Super+Shift+R` or `swaymsg reload`)
+
+This ensures your wallpaper persists across configuration reloads.
+
+## Troubleshooting
+
+### Wallpaper Not Changing
+
+**Check saved wallpaper path:**
+```bash
+cat ~/.config/sway/wallpaper
+```
+
+**Verify file exists:**
+```bash
+ls -l "$(cat ~/.config/sway/wallpaper)"
+```
+
+**Manually apply wallpaper:**
+```bash
+killall swaybg
+swaybg -i "$(cat ~/.config/sway/wallpaper)" -m fill &
+```
+
+### Multiple swaybg Processes
+
+If you see multiple `swaybg` processes consuming resources:
+
+```bash
+# Kill all swaybg processes
+killall swaybg
+
+# Restart wallpaper script
+~/.config/scripts/setwallpaper.sh
+```
+
+### Wallpaper Not Fitting Properly
+
+Try different display modes:
+
+```bash
+# Test different modes
+killall swaybg
+
+# Try fit mode
+swaybg -i "$(cat ~/.config/sway/wallpaper)" -m fit &
+
+# Try stretch mode
+swaybg -i "$(cat ~/.config/sway/wallpaper)" -m stretch &
+```
+
+### Wallpaper Disappears After Login
+
+Ensure the wallpaper path in `~/.config/sway/wallpaper` is absolute, not relative:
+
+```bash
+# Bad: ~/Pictures/wallpaper.jpg
+# Good: /home/username/Pictures/wallpaper.jpg
+```
+
+### Permission Denied
+
+Check file permissions:
+
+```bash
+chmod 644 ~/.config/wallpapers/*.{jpg,png,webp}
+chmod 755 ~/.config/scripts/setwallpaper.sh
+```
+
+## Advanced Usage
+
+### Dynamic Wallpaper Rotation
+
+Create a script to rotate wallpapers automatically:
+
+```bash
+#!/bin/bash
+# ~/.config/scripts/rotate-wallpaper.sh
+
+WALLPAPERS_DIR="$HOME/.config/wallpapers"
+shopt -s nullglob
+wallpapers=( "$WALLPAPERS_DIR"/*.{jpg,png,webp} )
+
+if [ ${#wallpapers[@]} -eq 0 ]; then
+    echo "No wallpapers found"
+    exit 1
+fi
+
+# Select random wallpaper
+random_wall="${wallpapers[RANDOM % ${#wallpapers[@]}]}"
+
+# Apply wallpaper
+echo "$random_wall" > ~/.config/sway/wallpaper
+killall swaybg
+swaybg -i "$random_wall" -m fill &
+```
+
+Schedule with a timer or cron:
+
+```bash
+# Rotate wallpaper every hour
+(crontab -l 2>/dev/null; echo "0 * * * * ~/.config/scripts/rotate-wallpaper.sh") | crontab -
+```
+
+### Wallpaper with Time-Based Selection
+
+```bash
+#!/bin/bash
+# ~/.config/scripts/time-based-wallpaper.sh
+
+hour=$(date +%H)
+
+if [ $hour -ge 6 ] && [ $hour -lt 12 ]; then
+    # Morning wallpaper
+    wallpaper="~/.config/wallpapers/morning.jpg"
+elif [ $hour -ge 12 ] && [ $hour -lt 18 ]; then
+    # Afternoon wallpaper
+    wallpaper="~/.config/wallpapers/afternoon.jpg"
+else
+    # Evening/night wallpaper
+    wallpaper="~/.config/wallpapers/night.jpg"
+fi
+
+echo "$wallpaper" > ~/.config/sway/wallpaper
+killall swaybg
+swaybg -i "$wallpaper" -m fill &
+```
+
+<Tip>
+Replace `setwallpaper.sh` with your custom script in `~/.config/sway/config:154` to enable dynamic wallpaper features.
+</Tip>

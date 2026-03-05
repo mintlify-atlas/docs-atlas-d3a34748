@@ -1,0 +1,658 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Config-Sway
+icon: wrench-screwdriver
+---
+
+# Troubleshooting
+
+This guide covers common issues you might encounter with Config-Sway and their solutions.
+
+## General Issues
+
+<Accordion title="Sway won't start or crashes on startup">
+
+**Symptoms**: Black screen, immediate crash to TTY, or error messages on startup.
+
+**Solutions**:
+
+1. Check for syntax errors in your configuration:
+   ```bash
+   sway -C ~/.config/sway/config
+   ```
+
+2. Start Sway with debug logging:
+   ```bash
+   sway -d 2> ~/sway.log
+   ```
+   Then check `~/sway.log` for error messages.
+
+3. Verify required environment variables are set:
+   ```bash
+   export XDG_CURRENT_DESKTOP=sway
+   export XDG_SESSION_TYPE=wayland
+   export XDG_SESSION_DESKTOP=sway
+   ```
+
+4. Check if required programs are installed:
+   ```bash
+   which sway waybar mako kitty rofi swaybg
+   ```
+
+5. Try running Sway with a minimal config:
+   ```bash
+   sway -c /dev/null
+   ```
+
+<Tip>
+If Sway starts with `-c /dev/null`, the issue is in your configuration file. Comment out sections systematically to find the problematic line.
+</Tip>
+
+</Accordion>
+
+<Accordion title="Configuration changes not taking effect">
+
+**Symptoms**: You edit config files but see no changes in Sway.
+
+**Solutions**:
+
+1. Reload Sway configuration:
+   ```bash
+   swaymsg reload
+   # or press Super+Shift+R
+   ```
+
+2. For theme changes, the theme file is included, so reload works. But verify the include:
+   ```bash
+   grep "include.*theme.conf" ~/.config/sway/config
+   ```
+
+3. For Waybar changes, restart Waybar:
+   ```bash
+   killall waybar
+   waybar -c ~/.config/waybar/config-sway.jsonc &
+   ```
+
+4. Check if you're editing the correct file:
+   ```bash
+   # Theme colors are in theme.conf, not main config
+   cat ~/.config/sway/theme.conf
+   ```
+
+5. Some changes (like input devices) require a full Sway restart:
+   ```bash
+   # Save your work, then:
+   swaymsg exit
+   # Then restart Sway
+   ```
+
+</Accordion>
+
+<Accordion title="High CPU or memory usage">
+
+**Symptoms**: System feels sluggish, fans spinning up, or high resource usage.
+
+**Solutions**:
+
+1. Check for multiple `swaybg` processes:
+   ```bash
+   ps aux | grep swaybg
+   # Kill duplicates
+   killall swaybg
+   ~/.config/scripts/setwallpaper.sh
+   ```
+
+2. Check for zombie Waybar processes:
+   ```bash
+   ps aux | grep waybar
+   killall waybar
+   waybar -c ~/.config/waybar/config-sway.jsonc &
+   ```
+
+3. Disable expensive Waybar modules:
+   ```json
+   // Temporarily disable in ~/.config/waybar/config-sway.jsonc
+   "modules-right": [
+     // "cpu",  // Comment out CPU monitoring
+     "network",
+     "battery",
+     "clock"
+   ]
+   ```
+
+4. Reduce wallpaper resolution:
+   ```bash
+   # Convert large wallpapers to reasonable size
+   convert input.jpg -resize 1920x1080 output.jpg
+   ```
+
+5. Check for runaway processes:
+   ```bash
+   htop
+   # or
+   btop
+   ```
+
+</Accordion>
+
+## Keybinding Issues
+
+<Accordion title="Keybindings not working">
+
+**Symptoms**: Pressing key combinations does nothing.
+
+**Solutions**:
+
+1. Verify the keybinding exists in config:
+   ```bash
+   grep "Super+A" ~/.config/sway/config
+   # Should show: bindsym $mod+a exec ...
+   ```
+
+2. Check for conflicting keybindings:
+   ```bash
+   # List all keybindings
+   grep "bindsym" ~/.config/sway/config
+   ```
+
+3. Test if the program exists:
+   ```bash
+   # For Super+F (Firefox)
+   which firefox
+   
+   # For Super+Z (Flameshot)
+   which flameshot
+   ```
+
+4. Verify script permissions:
+   ```bash
+   ls -l ~/.config/rofi/scripts/*.sh
+   # Should show: -rwxr-xr-x (executable)
+   
+   # Fix permissions if needed:
+   chmod +x ~/.config/rofi/scripts/*.sh
+   chmod +x ~/.config/scripts/*.sh
+   ```
+
+5. Test the command directly:
+   ```bash
+   # Run the command that should execute
+   ~/.config/rofi/scripts/theme-switcher.sh
+   ```
+
+</Accordion>
+
+<Accordion title="Multimedia keys not working">
+
+**Symptoms**: Volume, brightness, or media keys don't respond.
+
+**Solutions**:
+
+1. Check if required services are running:
+   ```bash
+   # For volume keys (WirePlumber/PipeWire)
+   wpctl status
+   
+   # For brightness
+   brightnessctl g
+   
+   # For media keys
+   playerctl status
+   ```
+
+2. Test commands manually:
+   ```bash
+   # Volume
+   wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+   
+   # Brightness
+   brightnessctl set 5%+
+   
+   # Media
+   playerctl play-pause
+   ```
+
+3. Add your user to required groups:
+   ```bash
+   sudo usermod -aG video,audio,input $USER
+   # Log out and back in
+   ```
+
+4. Install missing packages:
+   ```bash
+   # Arch Linux
+   sudo pacman -S wireplumber pipewire brightnessctl playerctl
+   ```
+
+</Accordion>
+
+## Display and Graphics Issues
+
+<Accordion title="Screen tearing or artifacts">
+
+**Symptoms**: Visual glitches, tearing during window movement or video playback.
+
+**Solutions**:
+
+1. Check if you're using proprietary GPU drivers (if applicable):
+   ```bash
+   # For NVIDIA
+   nvidia-smi
+   
+   # Check loaded modules
+   lsmod | grep nvidia
+   ```
+
+2. Set environment variables for better compatibility:
+   ```bash
+   # Add to ~/.config/environment.d/sway.conf
+   WLR_NO_HARDWARE_CURSORS=1
+   WLR_DRM_NO_ATOMIC=1
+   ```
+
+3. Try different rendering backends (for specific applications):
+   ```bash
+   # Firefox
+   export MOZ_ENABLE_WAYLAND=1
+   
+   # Chromium/Electron apps
+   export ELECTRON_OZONE_PLATFORM_HINT=wayland
+   ```
+
+4. Check Sway logs for GPU issues:
+   ```bash
+   journalctl --user -u sway -b
+   ```
+
+</Accordion>
+
+<Accordion title="External monitors not detected or wrong resolution">
+
+**Symptoms**: External displays don't show up or use incorrect resolution.
+
+**Solutions**:
+
+1. List all outputs:
+   ```bash
+   swaymsg -t get_outputs
+   ```
+
+2. Manually configure outputs in `~/.config/sway/config`:
+   ```bash
+   # Add output configuration
+   output HDMI-A-1 resolution 1920x1080 position 1920,0
+   ```
+
+3. Force display detection:
+   ```bash
+   swaymsg output HDMI-A-1 enable
+   ```
+
+4. Check available modes:
+   ```bash
+   swaymsg -t get_outputs | grep -A 20 "HDMI-A-1"
+   ```
+
+5. Try disabling and re-enabling:
+   ```bash
+   swaymsg output HDMI-A-1 disable
+   sleep 1
+   swaymsg output HDMI-A-1 enable
+   ```
+
+</Accordion>
+
+<Accordion title="Wallpaper not displaying or wrong wallpaper">
+
+**Symptoms**: Black screen background or incorrect wallpaper.
+
+**Solutions**:
+
+1. Check saved wallpaper path:
+   ```bash
+   cat ~/.config/sway/wallpaper
+   # Verify the file exists
+   ls -l "$(cat ~/.config/sway/wallpaper)"
+   ```
+
+2. Manually set wallpaper:
+   ```bash
+   killall swaybg
+   swaybg -i ~/.config/wallpapers/your-wallpaper.jpg -m fill &
+   ```
+
+3. Check for multiple swaybg processes:
+   ```bash
+   ps aux | grep swaybg
+   killall swaybg
+   ~/.config/scripts/setwallpaper.sh
+   ```
+
+4. Verify wallpaper file is not corrupted:
+   ```bash
+   file "$(cat ~/.config/sway/wallpaper)"
+   # Should show: JPEG/PNG/WebP image data
+   ```
+
+5. Check setwallpaper.sh script:
+   ```bash
+   bash -x ~/.config/scripts/setwallpaper.sh
+   # Shows execution trace for debugging
+   ```
+
+</Accordion>
+
+## Application-Specific Issues
+
+<Accordion title="Rofi menus not appearing or crashing">
+
+**Symptoms**: Pressing Super+D, Super+Q, or other Rofi shortcuts does nothing.
+
+**Solutions**:
+
+1. Test Rofi directly:
+   ```bash
+   rofi -show drun
+   ```
+
+2. Check for Rofi configuration errors:
+   ```bash
+   rofi -dump-config > /dev/null
+   ```
+
+3. Verify theme files exist:
+   ```bash
+   ls ~/.config/rofi/styles/_core/
+   # Should include palette.rasi
+   ```
+
+4. Test specific Rofi scripts:
+   ```bash
+   bash -x ~/.config/rofi/scripts/selector-app.sh
+   ```
+
+5. Check for missing dependencies:
+   ```bash
+   # Rofi may need these
+   which rofi fd rg
+   ```
+
+6. Regenerate Rofi palette:
+   ```bash
+   # Re-apply current theme to regenerate palette
+   ~/.config/rofi/scripts/theme-switcher.sh
+   ```
+
+</Accordion>
+
+<Accordion title="Waybar not appearing or showing incorrectly">
+
+**Symptoms**: No status bar visible or modules showing errors.
+
+**Solutions**:
+
+1. Check Waybar logs:
+   ```bash
+   killall waybar
+   waybar -c ~/.config/waybar/config-sway.jsonc -l debug
+   ```
+
+2. Verify config file syntax:
+   ```bash
+   jsonlint ~/.config/waybar/config-sway.jsonc
+   # or
+   jq . ~/.config/waybar/config-sway.jsonc
+   ```
+
+3. Check if config file exists:
+   ```bash
+   ls -l ~/.config/waybar/config-sway.jsonc
+   # If missing, re-apply theme or copy from theme directory
+   ```
+
+4. Disable problematic modules:
+   ```json
+   // Comment out failing modules in config-sway.jsonc
+   "modules-right": [
+     // "custom/broken-module",
+     "network",
+     "clock"
+   ]
+   ```
+
+5. Restart with default config:
+   ```bash
+   killall waybar
+   waybar  # Uses default config
+   ```
+
+</Accordion>
+
+<Accordion title="Flameshot screenshots not working">
+
+**Symptoms**: Pressing Super+Z does nothing, or Flameshot shows errors.
+
+**Solutions**:
+
+1. Verify xdg-desktop-portal-wlr is installed and running:
+   ```bash
+   # Check installation
+   pacman -Q xdg-desktop-portal-wlr
+   
+   # Restart portal services
+   systemctl --user restart xdg-desktop-portal xdg-desktop-portal-wlr
+   ```
+
+2. Check portal configuration:
+   ```bash
+   cat ~/.config/xdg-desktop-portal/sway-portals.conf
+   ```
+
+   Should contain:
+   ```ini
+   [preferred]
+   default=wlr;gtk
+   org.freedesktop.impl.portal.Screenshot=wlr
+   org.freedesktop.impl.portal.ScreenCast=wlr
+   ```
+
+3. Verify environment variables are set:
+   ```bash
+   echo $WAYLAND_DISPLAY
+   echo $SWAYSOCK
+   # Both should have values
+   ```
+
+4. Check Flameshot window rule:
+   ```bash
+   grep flameshot ~/.config/sway/config
+   # Should show: for_window [app_id="flameshot"] ...
+   ```
+
+5. Try alternative screenshot tool:
+   ```bash
+   # Using grim + slurp
+   grim -g "$(slurp)" ~/screenshot.png
+   ```
+
+</Accordion>
+
+<Accordion title="Kitty terminal not launching or crashing">
+
+**Symptoms**: Pressing Super+Enter does nothing or Kitty crashes immediately.
+
+**Solutions**:
+
+1. Test Kitty from command line:
+   ```bash
+   kitty
+   # Check for error messages
+   ```
+
+2. Check Kitty configuration:
+   ```bash
+   kitty --config ~/.config/kitty/kitty.conf
+   ```
+
+3. Try with default config:
+   ```bash
+   kitty --config NONE
+   ```
+
+4. Verify font is installed:
+   ```bash
+   # Check for Nerd Font
+   fc-list | grep -i "jetbrains\|nerd"
+   ```
+
+5. Check for conflicting themes:
+   ```bash
+   # Temporarily rename Kitty config
+   mv ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.bak
+   kitty  # Test with default
+   ```
+
+</Accordion>
+
+## Theme Switching Issues
+
+<Accordion title="Theme switcher not showing themes">
+
+**Symptoms**: Theme menu is empty or shows no themes.
+
+**Solutions**:
+
+1. Check themes directory:
+   ```bash
+   ls -la ~/.config/themes/
+   # Should show theme directories
+   ```
+
+2. Verify theme structure:
+   ```bash
+   # Each theme needs at minimum:
+   ls ~/.config/themes/Anime/sway/theme.conf
+   ls ~/.config/themes/Anime/wallpaper.*
+   ```
+
+3. Check script permissions:
+   ```bash
+   ls -l ~/.config/rofi/scripts/theme-switcher.sh
+   chmod +x ~/.config/rofi/scripts/theme-switcher.sh
+   ```
+
+4. Run script with debug output:
+   ```bash
+   bash -x ~/.config/rofi/scripts/theme-switcher.sh
+   ```
+
+</Accordion>
+
+<Accordion title="Theme applied but colors wrong">
+
+**Symptoms**: Theme switches but colors don't match or look broken.
+
+**Solutions**:
+
+1. Reload Sway after theme switch:
+   ```bash
+   swaymsg reload
+   ```
+
+2. Check theme.conf colors:
+   ```bash
+   cat ~/.config/sway/theme.conf
+   # Verify color values are valid hex codes
+   ```
+
+3. Restart Waybar:
+   ```bash
+   killall waybar
+   waybar -c ~/.config/waybar/config-sway.jsonc &
+   ```
+
+4. Verify CSS color variables:
+   ```bash
+   cat ~/.config/waybar/colors.css
+   ```
+
+5. Re-apply the theme:
+   ```bash
+   ~/.config/rofi/scripts/theme-switcher.sh "ThemeName"
+   ```
+
+</Accordion>
+
+## Performance Optimization
+
+<Accordion title="Slow window animations or lag">
+
+**Solutions**:
+
+1. Reduce gaps and borders (in theme.conf):
+   ```bash
+   gaps inner 0
+   gaps outer 0
+   default_border pixel 1
+   ```
+
+2. Disable transparency in Kitty:
+   ```bash
+   # In ~/.config/kitty/kitty.conf
+   background_opacity 1.0
+   ```
+
+3. Use simpler Waybar modules:
+   ```json
+   // Remove CPU/memory monitoring
+   "modules-right": ["network", "battery", "clock"]
+   ```
+
+4. Reduce Waybar update intervals:
+   ```json
+   "cpu": {
+     "interval": 10  // Update every 10 seconds instead of 1
+   }
+   ```
+
+</Accordion>
+
+## Getting Help
+
+If these troubleshooting steps don't resolve your issue:
+
+1. **Check Sway logs**:
+   ```bash
+   journalctl --user -u sway -b
+   ```
+
+2. **Check system logs**:
+   ```bash
+   journalctl -b | grep -i error
+   ```
+
+3. **Collect system information**:
+   ```bash
+   # System info
+   uname -a
+   
+   # GPU info
+   lspci | grep VGA
+   
+   # Installed packages
+   pacman -Q | grep -E "sway|waybar|rofi|kitty|mako"
+   ```
+
+4. **Test with minimal config**: Create a minimal test configuration to isolate the issue.
+
+5. **Check upstream documentation**:
+   - [Sway Wiki](https://github.com/swaywm/sway/wiki)
+   - [Waybar Wiki](https://github.com/Alexays/Waybar/wiki)
+   - [Sway FAQ](https://github.com/swaywm/sway/wiki/FAQ)
+
+<Warning>
+Before reporting issues, ensure you're running the latest versions of all components:
+```bash
+sudo pacman -Syu
+```
+</Warning>

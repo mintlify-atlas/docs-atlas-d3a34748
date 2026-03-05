@@ -1,0 +1,594 @@
+---
+title: 'Theme System'
+description: 'Understanding the unified theme system across all components'
+icon: 'palette'
+---
+
+# Theme System
+
+Config-Sway features a unified theme system that synchronizes colors, styles, and wallpapers across all components: Sway, Waybar, Kitty, and Rofi. One command switches everything instantly.
+
+## How It Works
+
+### Quick Theme Switching
+
+Press **`Super + A`** to open the theme switcher. Select a theme and all components update automatically:
+
+- **Sway**: Window borders, gaps, and focus colors
+- **Waybar**: Status bar colors and styles
+- **Kitty**: Terminal color scheme
+- **Rofi**: Menu colors and styling
+- **Wallpaper**: Desktop background
+
+<Tip>
+The theme switcher shows preview images (wallpapers) for each theme, making it easy to see what you're selecting.
+</Tip>
+
+## Theme Directory Structure
+
+```
+~/.config/themes/
+├── Anime/
+│   ├── kitty/
+│   │   └── kitty.conf
+│   ├── waybar/
+│   │   ├── colors.css
+│   │   ├── style.css
+│   │   └── config.jsonc (optional)
+│   ├── sway/
+│   │   └── theme.conf
+│   ├── rofi-style/
+│   │   └── _core/
+│   │       └── palette.rasi
+│   └── wallpaper.jpg
+├── Batman/
+│   ├── ... (same structure)
+│   └── wallpaper.jpg
+├── Hacker/
+├── Mode-Dark/
+├── Superman/
+├── Windows10/
+└── .current              # Tracks currently active theme
+```
+
+## Built-in Themes
+
+<Accordion title="Anime Theme">
+
+**Color Scheme:** Catppuccin Mocha-inspired
+
+```sway ~/.config/themes/Anime/sway/theme.conf
+set $bg #1e1e2e
+set $fg #cdd6f4
+set $active #89b4fa
+set $inactive #45475a
+
+default_border pixel 2
+default_floating_border pixel 2
+gaps inner 5
+gaps outer 10
+```
+
+**Characteristics:**
+- Dark purple-blue background
+- Bright blue accents for active windows
+- Catppuccin color palette
+- Anime-style wallpaper
+
+</Accordion>
+
+<Accordion title="Batman Theme">
+
+**Color Scheme:** Dark gray and white
+
+```sway ~/.config/themes/Batman/sway/theme.conf
+set $bg #212121
+set $fg #dfdfdf
+set $active #dfdfdf
+set $inactive #45475a
+
+default_border pixel 2
+default_floating_border pixel 2
+gaps inner 5
+gaps outer 10
+```
+
+**Characteristics:**
+- Nearly black background
+- White/light gray active borders
+- Minimalist dark aesthetic
+- Batman-themed wallpaper
+
+</Accordion>
+
+<Accordion title="Hacker Theme">
+
+**Color Scheme:** Matrix-style green on black
+
+**Characteristics:**
+- Terminal/hacker aesthetic
+- Green accent colors
+- Black background
+- Code/terminal-themed wallpaper
+
+</Accordion>
+
+<Accordion title="Mode-Dark Theme">
+
+**Characteristics:**
+- Pure dark mode
+- Minimal distractions
+- High contrast
+- Simple dark wallpaper
+
+</Accordion>
+
+<Accordion title="Superman Theme">
+
+**Characteristics:**
+- Red and blue color scheme
+- Bold, vibrant colors
+- Superman-themed wallpaper
+
+</Accordion>
+
+<Accordion title="Windows10 Theme">
+
+**Characteristics:**
+- Windows 10-inspired colors
+- Blue accent colors
+- Familiar Windows aesthetic
+- Windows 10 default wallpaper
+
+</Accordion>
+
+## Theme Components
+
+### Sway Configuration
+
+**File:** `<theme>/sway/theme.conf`
+
+Defines window manager appearance:
+
+```sway
+# Color variables
+set $bg #1e1e2e          # Background color
+set $fg #cdd6f4          # Foreground/text color
+set $active #89b4fa      # Active window border
+set $inactive #45475a    # Inactive window border
+
+# Window decorations
+default_border pixel 2
+default_floating_border pixel 2
+
+# Gaps
+gaps inner 5
+gaps outer 10
+
+# Window border colors
+client.focused          $active   $active   $fg      $active   $active
+client.focused_inactive $inactive $inactive $fg      $inactive $inactive
+client.unfocused        $inactive $inactive $fg      $inactive $inactive
+```
+
+<Note>
+The main Sway config (`~/.config/sway/config`) includes this file with:
+```sway
+include ~/.config/sway/theme.conf
+```
+</Note>
+
+### Waybar Styling
+
+**Files:**
+- `<theme>/waybar/colors.css` - Color variable definitions
+- `<theme>/waybar/style.css` - CSS styling rules
+- `<theme>/waybar/config.jsonc` - Optional custom layout
+
+#### Color Variables
+
+```css ~/.config/themes/Anime/waybar/colors.css
+@define-color mauve #a6dcf7;
+@define-color text #cdd6f4;
+@define-color base rgba(30, 30, 46, 1);
+@define-color mantle #181825;
+@define-color crust #11111b;
+@define-color red #f38ba8;
+@define-color green #a6e3a1;
+```
+
+#### Style Import
+
+```css ~/.config/waybar/style.css
+@import "colors.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 18px;
+}
+
+#waybar .module:hover {
+    color: @mauve;
+    background-color: @base;
+}
+```
+
+### Kitty Terminal Colors
+
+**File:** `<theme>/kitty/kitty.conf`
+
+Each theme provides a complete Kitty configuration with color overrides:
+
+```conf ~/.config/themes/Batman/kitty/kitty.conf
+font_family      JetBrainsMono Nerd Font
+font_size        18
+
+cursor #ad8ee6
+background_opacity 0.95
+
+include colors.ini  # Theme-specific color palette
+```
+
+The `colors.ini` file (if present) defines the 16 terminal colors.
+
+### Rofi Menu Colors
+
+**File:** `<theme>/rofi-style/_core/palette.rasi`
+
+```rasi ~/.config/themes/Anime/rofi-style/_core/palette.rasi
+* {
+    font:                  "JetBrains Mono Nerd Font 14";
+    background:            #1e1e2e;
+    background-alt:        #242438;
+    foreground:            #89b3fa;
+    selected:              #89b3fa;
+    active:                #40392e;
+    urgent:                #312b26;
+}
+```
+
+<Tip>
+If a theme doesn't include a Rofi palette, the theme switcher automatically generates one from the Sway theme colors.
+</Tip>
+
+### Wallpaper
+
+**File:** `<theme>/wallpaper.{jpg,png,webp}`
+
+Each theme must include a wallpaper image. Supported formats:
+- JPEG (`.jpg`)
+- PNG (`.png`)
+- WebP (`.webp`)
+
+The theme switcher checks for wallpapers in this order.
+
+## Theme Switcher Script
+
+### How It Works
+
+The `theme-switcher.sh` script performs these steps:
+
+<Steps>
+  <Step title="Scan for themes">
+    Lists all directories in `~/.config/themes/`
+  </Step>
+  
+  <Step title="Show preview menu">
+    Displays Rofi menu with wallpaper images as icons
+  </Step>
+  
+  <Step title="Backup current config">
+    Creates timestamped backups:
+    - `~/.config/kitty.bak-20260305-143022`
+    - `~/.config/waybar.bak-20260305-143022`
+    - `~/.config/sway/theme.conf.bak-20260305-143022`
+  </Step>
+  
+  <Step title="Copy theme files">
+    Copies configuration from selected theme to active directories
+  </Step>
+  
+  <Step title="Adapt for Sway">
+    Converts Waybar config from Hyprland to Sway:
+    ```bash
+    sed \
+      -e 's#hyprland/workspaces#sway/workspaces#g' \
+      -e 's#hyprland/window#sway/window#g' \
+      "$theme/waybar/config.jsonc" > ~/.config/waybar/config-sway.jsonc
+    ```
+  </Step>
+  
+  <Step title="Generate Rofi palette">
+    If no Rofi palette exists, extracts colors from Sway theme:
+    ```bash
+    bg="$(awk '$1=="set" && $2=="$bg"{print $3}' theme.conf)"
+    fg="$(awk '$1=="set" && $2=="$fg"{print $3}' theme.conf)"
+    # ... generates palette.rasi
+    ```
+  </Step>
+  
+  <Step title="Apply wallpaper">
+    ```bash
+    echo "/path/to/wallpaper.jpg" > ~/.config/sway/wallpaper
+    killall swaybg
+    swaybg -i "/path/to/wallpaper.jpg" -m fill &
+    ```
+  </Step>
+  
+  <Step title="Reload components">
+    ```bash
+    killall waybar
+    waybar -c ~/.config/waybar/config-sway.jsonc &
+    swaymsg reload
+    ```
+  </Step>
+  
+  <Step title="Save current theme">
+    ```bash
+    echo "ThemeName" > ~/.config/themes/.current
+    ```
+  </Step>
+</Steps>
+
+## Creating a Custom Theme
+
+### Step-by-Step Guide
+
+<Steps>
+  <Step title="Create theme directory">
+    ```bash
+    mkdir -p ~/.config/themes/MyTheme/{sway,waybar,kitty,rofi-style/_core}
+    ```
+  </Step>
+  
+  <Step title="Define Sway colors">
+    Create `~/.config/themes/MyTheme/sway/theme.conf`:
+    ```sway
+    set $bg #1a1b26
+    set $fg #c0caf5
+    set $active #7aa2f7
+    set $inactive #414868
+    
+    default_border pixel 2
+    default_floating_border pixel 2
+    gaps inner 5
+    gaps outer 10
+    
+    client.focused          $active   $active   $fg      $active   $active
+    client.focused_inactive $inactive $inactive $fg      $inactive $inactive
+    client.unfocused        $inactive $inactive $fg      $inactive $inactive
+    ```
+  </Step>
+  
+  <Step title="Create Waybar colors">
+    Create `~/.config/themes/MyTheme/waybar/colors.css`:
+    ```css
+    @define-color background #1a1b26;
+    @define-color foreground #c0caf5;
+    @define-color accent #7aa2f7;
+    @define-color mauve #7aa2f7;
+    @define-color text #c0caf5;
+    @define-color base rgba(26, 27, 38, 1);
+    @define-color mantle #16161e;
+    ```
+  </Step>
+  
+  <Step title="Copy Waybar style (optional)">
+    ```bash
+    cp ~/.config/waybar/style.css ~/.config/themes/MyTheme/waybar/
+    ```
+    Or create a custom one.
+  </Step>
+  
+  <Step title="Configure Kitty">
+    Create `~/.config/themes/MyTheme/kitty/kitty.conf`:
+    ```conf
+    # Copy base config
+    font_family      JetBrainsMono Nerd Font
+    font_size        18
+    background_opacity 0.95
+    
+    # Custom colors
+    background #1a1b26
+    foreground #c0caf5
+    cursor #7aa2f7
+    
+    # Terminal colors 0-15
+    color0  #1a1b26
+    color1  #f7768e
+    color2  #9ece6a
+    # ... etc
+    ```
+  </Step>
+  
+  <Step title="Add wallpaper">
+    ```bash
+    cp /path/to/your/wallpaper.jpg ~/.config/themes/MyTheme/wallpaper.jpg
+    ```
+  </Step>
+  
+  <Step title="Test the theme">
+    Press `Super + A` and select "MyTheme"
+  </Step>
+</Steps>
+
+<Note>
+Rofi palette is optional - the theme switcher will auto-generate one from your Sway colors if you don't provide `rofi-style/_core/palette.rasi`.
+</Note>
+
+## Color Consistency Tips
+
+### Using a Color Scheme Generator
+
+1. **Choose a base palette** (e.g., from [Catppuccin](https://github.com/catppuccin/catppuccin))
+2. **Define core colors:**
+   - Background (dark)
+   - Foreground (text)
+   - Accent (active elements)
+   - Inactive (dimmed elements)
+3. **Apply consistently across all configs**
+
+### Example Color Mapping
+
+| Purpose | Sway Variable | Waybar CSS | Kitty Setting |
+|---------|---------------|------------|---------------|
+| Background | `$bg` | `@base` | `background` |
+| Text | `$fg` | `@text` | `foreground` |
+| Accent | `$active` | `@mauve` | `cursor` |
+| Dim | `$inactive` | `@mantle` | `color8` |
+
+## Theme Troubleshooting
+
+<Accordion title="Theme not applying completely">
+
+**Check for missing files:**
+```bash
+ls -la ~/.config/themes/YourTheme/
+```
+
+Required:
+- `sway/theme.conf`
+- `wallpaper.{jpg,png,webp}`
+
+Optional (auto-generated if missing):
+- `waybar/colors.css`
+- `waybar/style.css`
+- `kitty/kitty.conf`
+- `rofi-style/_core/palette.rasi`
+
+</Accordion>
+
+<Accordion title="Waybar colors wrong after theme switch">
+
+**Force Waybar reload:**
+```bash
+killall waybar
+waybar -c ~/.config/waybar/config-sway.jsonc &
+```
+
+**Check if colors.css was copied:**
+```bash
+cat ~/.config/waybar/colors.css
+```
+
+</Accordion>
+
+<Accordion title="Rofi menus using wrong colors">
+
+**Regenerate Rofi palette:**
+```bash
+rm ~/.config/rofi/styles/_core/palette.rasi
+swaymsg reload
+```
+
+Then switch theme again with `Super + A`.
+
+</Accordion>
+
+<Accordion title="Wallpaper not changing">
+
+**Check wallpaper file exists:**
+```bash
+cat ~/.config/sway/wallpaper
+ls -la $(cat ~/.config/sway/wallpaper)
+```
+
+**Manually set wallpaper:**
+```bash
+killall swaybg
+swaybg -i /path/to/wallpaper.jpg -m fill &
+```
+
+</Accordion>
+
+<Accordion title="Backup files accumulating">
+
+The theme switcher creates timestamped backups. Clean old ones:
+
+```bash
+find ~/.config -name "*.bak-*" -mtime +30 -delete
+```
+
+This removes backups older than 30 days.
+
+</Accordion>
+
+## Advanced Theme Features
+
+### Per-Theme Waybar Layouts
+
+Some themes may include custom `waybar/config.jsonc` with different module arrangements:
+
+```json
+{
+  "modules-left": ["sway/workspaces", "sway/window"],
+  "modules-center": ["clock"],
+  "modules-right": ["network", "battery", "tray"]
+}
+```
+
+This overrides the default layout when that theme is active.
+
+### Dynamic Palette Generation
+
+When auto-generating Rofi colors, the theme switcher intelligently picks values:
+
+```bash
+bg="${bg:-#1e1e2e}"              # Fallback if extraction fails
+fg="${fg:-#89b3fa}"
+active="${active:-#89b3fa}"
+inactive="${inactive:-#242438}"
+```
+
+### Font Customization
+
+Themes can specify custom fonts in Sway config:
+
+```sway
+font pango:JetBrains Mono Nerd Font 14
+```
+
+The Rofi palette generator extracts this:
+
+```bash
+font_line="$(awk '$1=="font"{ $1=""; print }' theme.conf)"
+rofi_font="${font_line#pango:}"
+rofi_font="${rofi_font:-JetBrains Mono Nerd Font 14}"
+```
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Sway Theme Settings" icon="window" href="/configuration/sway">
+    Window border and gap configuration
+  </Card>
+  <Card title="Waybar Styling" icon="chart-bar" href="/configuration/waybar">
+    Status bar colors and CSS
+  </Card>
+  <Card title="Kitty Colors" icon="terminal" href="/configuration/kitty">
+    Terminal color schemes
+  </Card>
+  <Card title="Rofi Menus" icon="window-restore" href="/configuration/rofi">
+    Menu styling and color palettes
+  </Card>
+</CardGroup>
+
+## Theme Resources
+
+### Color Palette Inspiration
+
+- **[Catppuccin](https://github.com/catppuccin/catppuccin)** - Pastel theme collection
+- **[Dracula](https://draculatheme.com/)** - Dark theme with vibrant colors
+- **[Nord](https://www.nordtheme.com/)** - Arctic-inspired palette
+- **[Gruvbox](https://github.com/morhetz/gruvbox)** - Retro groove colors
+- **[Tokyo Night](https://github.com/enkia/tokyo-night-vscode-theme)** - Dark blue theme
+
+### Wallpaper Sources
+
+- **[Unsplash](https://unsplash.com/)** - High-quality free photos
+- **[Wallhaven](https://wallhaven.cc/)** - Community wallpaper collection
+- **[Reddit /r/wallpaper](https://reddit.com/r/wallpaper)** - User submissions
+
+<Tip>
+Keep wallpaper file sizes reasonable (under 5MB) to avoid slowdowns when switching themes.
+</Tip>

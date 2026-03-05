@@ -1,80 +1,431 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get up and running with Config-Sway in minutes
 ---
 
-## Get started in three steps
+## Getting Started
 
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+Welcome to Config-Sway! This guide will help you start using your new Sway window manager setup immediately.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+If you haven't installed Config-Sway yet, follow the [Installation Guide](/installation) first.
 </Note>
+
+## Starting Sway
+
+You can start Sway from a TTY or through a display manager.
+
+### From TTY (Recommended)
+
+<Steps>
+<Step title="Switch to a TTY">
+Press `Ctrl+Alt+F2` (or F3, F4, etc.) to switch to a text terminal.
+</Step>
+
+<Step title="Log in">
+Enter your username and password.
+</Step>
+
+<Step title="Launch Sway">
+```bash
+sway
+```
+
+Sway will start and you'll see your desktop with Waybar at the top.
+</Step>
+</Steps>
+
+<Warning>
+If you're running NVIDIA graphics, you may experience issues with Wayland. AMD and Intel GPUs work best with Sway.
+</Warning>
+
+### From a Display Manager
+
+If you use a display manager (GDM, SDDM, LightDM), select "Sway" from the session menu before logging in.
+
+## Essential Keybindings
+
+Config-Sway uses **Super** (Windows key) as the primary modifier, with Hyprland-style shortcuts.
+
+### Opening Applications
+
+<CodeGroup>
+```text Terminal
+Super + Enter        Open Kitty terminal
+```
+
+```text Application Launcher
+Super + D           Open Rofi application launcher
+```
+
+```text Web Browser
+Super + F           Open Firefox
+```
+
+```text Screenshot
+Super + Z           Open Flameshot (screenshot tool)
+```
+</CodeGroup>
+
+### Window Management
+
+<CodeGroup>
+```text Focus
+Super + H           Focus window to the left
+Super + J           Focus window below
+Super + K           Focus window above
+Super + L           Focus window to the right
+```
+
+```text Window Actions
+Super + C           Close focused window
+Super + U           Toggle floating mode
+Super + P           Toggle fullscreen
+Super + O           Toggle split layout (horizontal/vertical)
+```
+</CodeGroup>
+
+### Workspaces
+
+<CodeGroup>
+```text Switch Workspace
+Super + 1-9         Switch to workspace 1-9
+Super + 0           Switch to workspace 10
+Super + S           Switch to "magic" workspace
+```
+
+```text Move Window to Workspace
+Super + Shift + 1-9 Move window to workspace 1-9
+Super + Shift + 0   Move window to workspace 10
+Super + Shift + S   Move window to "magic" workspace
+```
+</CodeGroup>
+
+### System Menus
+
+<CodeGroup>
+```text Power Menu
+Super + Q           Open power menu (shutdown/reboot/lock/suspend/logout)
+```
+
+```text Theme Switcher
+Super + A           Open theme switcher
+```
+
+```text Wallpaper Switcher
+Super + W           Change wallpaper
+```
+
+```text Emoji/Icon Menu
+Super + E           Open emoji/icon menu
+```
+</CodeGroup>
+
+## Your First Session
+
+Let's walk through using Sway for the first time.
+
+<Steps>
+<Step title="Open a terminal">
+Press `Super + Enter` to open Kitty, your terminal emulator.
+
+<Note>
+Kitty is a GPU-accelerated terminal with excellent performance and features like ligatures and image support.
+</Note>
+</Step>
+
+<Step title="Launch applications">
+Press `Super + D` to open the Rofi application launcher. Type the name of an application and press Enter to launch it.
+
+Try launching Firefox: press `Super + D`, type "firefox", and press Enter.
+</Step>
+
+<Step title="Navigate between windows">
+Use `Super + H/J/K/L` to move focus between open windows:
+
+- `Super + H` - Focus left
+- `Super + L` - Focus right
+- `Super + K` - Focus up
+- `Super + J` - Focus down
+
+This follows Vim-style navigation keys.
+</Step>
+
+<Step title="Switch workspaces">
+Press `Super + 2` to switch to workspace 2. Press `Super + 1` to return to workspace 1.
+
+Workspaces help you organize windows by task or project.
+</Step>
+
+<Step title="Move windows between workspaces">
+Focus a window, then press `Super + Shift + 2` to move it to workspace 2.
+
+Press `Super + 2` to follow it to that workspace.
+</Step>
+</Steps>
+
+## Customizing Your Setup
+
+### Switching Themes
+
+Config-Sway includes a unified theme system that changes colors across Sway, Waybar, Kitty, and Rofi.
+
+<Steps>
+<Step title="Open the theme switcher">
+Press `Super + A` to open the theme switcher menu.
+</Step>
+
+<Step title="Select a theme">
+Use arrow keys to navigate and Enter to select a theme.
+
+The theme applies immediately to:
+- Window borders and title bars (Sway)
+- Status bar colors (Waybar)
+- Terminal colors (Kitty)
+- Menu colors (Rofi)
+- Wallpaper
+</Step>
+
+<Step title="Verify the change">
+Your current theme is saved in `~/.config/themes/.current`.
+
+Open a new terminal window to see the updated colors: `Super + Enter`
+</Step>
+</Steps>
+
+### Changing Wallpapers
+
+Press `Super + W` to open the wallpaper switcher. Select an image from your wallpapers directory.
+
+<Note>
+Wallpapers are stored in `~/.config/wallpapers/`. Add your own images to this directory to use them.
+</Note>
+
+## Window Layout Tips
+
+### Floating Windows
+
+By default, Sway tiles windows automatically. To make a window float:
+
+1. Focus the window
+2. Press `Super + U` to toggle floating mode
+3. Move floating windows with `Super + Shift + H/J/K/L` (50px) or `Super + Alt + H/J/K/L` (150px)
+4. Resize floating windows with `Super + Ctrl + H/J/K/L`
+
+### Split Direction
+
+Press `Super + O` to toggle between horizontal and vertical splits. New windows will tile in the current split direction.
+
+### Fullscreen
+
+Press `Super + P` to make the focused window fullscreen. Press it again to exit fullscreen.
+
+## Using the Power Menu
+
+Press `Super + Q` to open the power menu with these options:
+
+- **Shutdown**: Power off your computer
+- **Reboot**: Restart your computer
+- **Lock**: Lock your screen with swaylock
+- **Suspend**: Suspend to RAM (sleep mode)
+- **Logout**: Exit Sway and return to TTY/display manager
+
+## Media Controls
+
+Config-Sway includes multimedia key support:
+
+<CodeGroup>
+```text Volume
+XF86AudioRaiseVolume    Increase volume by 5%
+XF86AudioLowerVolume    Decrease volume by 5%
+XF86AudioMute           Toggle mute
+XF86AudioMicMute        Toggle microphone mute
+```
+
+```text Brightness
+XF86MonBrightnessUp     Increase brightness
+XF86MonBrightnessDown   Decrease brightness
+```
+
+```text Media Playback
+XF86AudioPlay           Play/Pause
+XF86AudioNext           Next track
+XF86AudioPrev           Previous track
+```
+</CodeGroup>
+
+<Note>
+These keys work automatically if your keyboard has dedicated media keys. On laptops, they're usually accessed with the `Fn` key.
+</Note>
+
+## Notifications
+
+Config-Sway uses Mako for notifications.
+
+### Notification Controls
+
+- `Super + N` - Dismiss all notifications
+- `Super + Shift + N` - Toggle Do Not Disturb mode
+
+Notifications appear in the top-right corner of your screen.
+
+## Mouse Gestures
+
+You can also use your mouse with the Super key:
+
+- `Super + Left Click` - Drag to move window
+- `Super + Middle Click` - Drag to resize window
+- `Super + Right Click` - Toggle floating mode
+- `Super + Scroll Up` - Next workspace
+- `Super + Scroll Down` - Previous workspace
+
+## Reloading Configuration
+
+After editing configuration files:
+
+```bash
+# Reload Sway config
+Super + Shift + R
+```
+
+Or from a terminal:
+
+```bash
+swaymsg reload
+```
+
+To restart Waybar:
+
+```bash
+killall waybar
+waybar &
+```
+
+## Getting Help
+
+### View All Keybindings
+
+All keybindings are defined in `~/.config/sway/config`. Open it in your editor:
+
+```bash
+nvim ~/.config/sway/config
+```
+
+### Check Sway Status
+
+```bash
+# View Sway IPC socket
+swaymsg -t get_tree
+
+# List outputs
+swaymsg -t get_outputs
+
+# List workspaces
+swaymsg -t get_workspaces
+```
+
+### Debug Issues
+
+<CodeGroup>
+```bash View Sway logs
+journalctl --user -u sway -b
+```
+
+```bash Test Sway config
+sway --validate
+```
+
+```bash Check portal status
+systemctl --user status xdg-desktop-portal-wlr
+```
+</CodeGroup>
+
+## Quick Reference Card
+
+### Most Important Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Super + Enter` | Open terminal |
+| `Super + D` | Application launcher |
+| `Super + Q` | Power menu |
+| `Super + C` | Close window |
+| `Super + A` | Theme switcher |
+| `Super + H/J/K/L` | Navigate windows |
+| `Super + 1-9` | Switch workspace |
+| `Super + Shift + 1-9` | Move window to workspace |
+| `Super + U` | Toggle floating |
+| `Super + P` | Toggle fullscreen |
+
+## Next Steps
+
+Now that you're familiar with the basics, explore more features:
+
+<Card title="Customization" icon="palette" href="/guides/customization">
+  Learn how to customize themes, configure Waybar, and personalize your setup.
+</Card>
+
+<Card title="Keybindings" icon="keyboard" href="/guides/keybindings">
+  View the complete keybinding reference with all shortcuts.
+</Card>
+
+<Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+  Solutions for common issues and problems.
+</Card>
+
+## Tips for New Users
+
+<Note>
+**Coming from a desktop environment?** Sway works differently:
+
+- There's no traditional "minimize" - use workspaces instead
+- Windows tile automatically - use `Super + U` to float windows when needed
+- The status bar (Waybar) shows workspace indicators - click them to switch
+- Right-click the network icon in Waybar to manage WiFi connections
+</Note>
+
+<Warning>
+**Remember to save your work!** Unlike some desktop environments, closing the last window doesn't prevent logout. Press `Super + Q` and select "Logout" when you're ready to exit.
+</Warning>
+
+## Practice Exercise
+
+Try this workflow to get comfortable with Sway:
+
+<Steps>
+<Step title="Open multiple terminals">
+Press `Super + Enter` three times to open three terminal windows.
+
+Notice how they tile automatically.
+</Step>
+
+<Step title="Navigate between them">
+Use `Super + H/J/K/L` to move focus between terminals.
+</Step>
+
+<Step title="Move one to workspace 2">
+Focus one terminal and press `Super + Shift + 2`.
+
+Press `Super + 2` to see it in workspace 2.
+</Step>
+
+<Step title="Switch back to workspace 1">
+Press `Super + 1` to return.
+</Step>
+
+<Step title="Make a terminal floating">
+Focus a terminal and press `Super + U`.
+
+Move it with `Super + Shift + H/J/K/L`.
+
+Resize it with `Super + Ctrl + H/J/K/L`.
+</Step>
+
+<Step title="Close everything">
+Press `Super + C` on each window to close them.
+
+Or press `Super + Q` and select "Logout" to exit Sway.
+</Step>
+</Steps>
+
+Congratulations! You now know the fundamentals of using Config-Sway.

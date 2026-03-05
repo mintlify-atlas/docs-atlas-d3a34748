@@ -1,0 +1,576 @@
+---
+title: 'Kitty Terminal Configuration'
+description: 'Terminal emulator configuration, fonts, colors, and keybindings'
+icon: 'terminal'
+---
+
+# Kitty Terminal Configuration
+
+Kitty is the default terminal emulator in Config-Sway, chosen for its GPU acceleration, extensive customization, and excellent font rendering.
+
+## Configuration File
+
+**Location:** `~/.config/kitty/kitty.conf`
+
+This file is dynamically updated when switching themes. Each theme provides its own `kitty/kitty.conf` which replaces the active configuration.
+
+## Font Configuration
+
+### Primary Font
+
+```conf ~/.config/kitty/kitty.conf
+font_family      JetBrainsMono Nerd Font
+bold_font        JetBrainsMono Nerd Font Bold
+italic_font      JetBrainsMono Nerd Font Italic
+bold_italic_font JetBrainsMono Nerd Font Bold Italic
+font_size        18
+```
+
+<Note>
+**JetBrains Mono Nerd Font** is required for proper icon rendering. Install it with:
+```bash
+sudo pacman -S ttf-jetbrains-mono-nerd
+```
+</Note>
+
+### Emoji Support
+
+```conf
+symbol_map U+1F300-U+1F5FF Noto Color Emoji
+symbol_map U+1F600-U+1F64F Noto Color Emoji
+symbol_map U+1F680-U+1F6FF Noto Color Emoji
+symbol_map U+1F700-U+1F77F Noto Color Emoji
+symbol_map U+1F900-U+1F9FF Noto Color Emoji
+symbol_map U+1FA00-U+1FAFF Noto Color Emoji
+```
+
+Maps Unicode emoji ranges to the Noto Color Emoji font for proper emoji rendering.
+
+**Install emoji font:**
+```bash
+sudo pacman -S noto-fonts-emoji
+```
+
+## Appearance
+
+### Cursor Configuration
+
+```conf
+cursor #ad8ee6
+cursor_shape beam
+cursor_beam_thickness 1.8
+```
+
+- **Color:** Purple (`#ad8ee6`)
+- **Shape:** Vertical beam (like insert mode in editors)
+- **Thickness:** 1.8 pixels
+
+<Tip>
+Change `cursor_shape` to `block` for a traditional terminal cursor, or `underline` for a subtle underline cursor.
+</Tip>
+
+### Transparency
+
+```conf
+background_opacity 0.95
+```
+
+95% opacity provides subtle transparency while keeping text readable.
+
+### URL Styling
+
+```conf
+url_color #61afef
+url_style curly
+```
+
+- URLs are highlighted in blue
+- Curly underline style distinguishes them from regular text
+
+**Click URLs:** Hold `Ctrl` and click any URL to open it in your browser.
+
+## Keybindings
+
+<Accordion title="Window Navigation">
+
+### Move Focus Between Windows
+
+```conf
+map ctrl+left neighboring_window left
+map ctrl+right neighboring_window right
+map ctrl+up neighboring_window up
+map ctrl+down neighboring_window down
+```
+
+Use **`Ctrl + Arrow Keys`** to move between split terminal windows.
+
+</Accordion>
+
+<Accordion title="Multiple Clipboards">
+
+Kitty supports multiple copy-paste buffers:
+
+```conf
+map f1 copy_to_buffer a
+map f2 paste_from_buffer a
+map f3 copy_to_buffer b
+map f4 paste_from_buffer b
+```
+
+**Usage:**
+1. Select text
+2. Press `F1` to copy to buffer A (or `F3` for buffer B)
+3. Press `F2` to paste from buffer A (or `F4` for buffer B)
+
+<Tip>
+Use buffer A for temporary snippets and buffer B for frequently-used commands or paths.
+</Tip>
+
+</Accordion>
+
+<Accordion title="Window and Tab Management">
+
+### Create New Windows/Tabs
+
+```conf
+map ctrl+shift+enter new_window_with_cwd
+map ctrl+shift+t new_tab_with_cwd
+```
+
+- **`Ctrl + Shift + Enter`** - New window in current directory
+- **`Ctrl + Shift + T`** - New tab in current directory
+
+Both commands inherit the current working directory.
+
+### Rename Tab
+
+```conf
+map ctrl+shift+n set_tab_title
+```
+
+**`Ctrl + Shift + N`** opens a prompt to rename the current tab.
+
+### Layout Toggle
+
+```conf
+map ctrl+shift+z toggle_layout stack
+```
+
+**`Ctrl + Shift + Z`** toggles between normal layout and stack layout (one window maximized).
+
+</Accordion>
+
+## Tab Bar Styling
+
+```conf
+tab_bar_style powerline
+
+inactive_tab_background #e06c75
+active_tab_background #98c379
+inactive_tab_foreground #000000
+tab_bar_margin_color black
+```
+
+- **Style:** Powerline (angled separators)
+- **Active tab:** Green background (`#98c379`)
+- **Inactive tabs:** Red background (`#e06c75`)
+- **Text:** Black for contrast
+
+<Note>
+Tab colors are defined in the base config, but theme-specific color files may override them via `include colors.ini`.
+</Note>
+
+## Performance Settings
+
+```conf
+repaint_delay 10
+input_delay 3
+sync_to_monitor yes
+```
+
+- **`repaint_delay 10`** - Redraw every 10ms (smooth rendering)
+- **`input_delay 3`** - Process input every 3ms (responsive typing)
+- **`sync_to_monitor yes`** - Sync redraws to monitor refresh rate (eliminates tearing)
+
+<Tip>
+These settings optimize for smoothness. If you experience high CPU usage, try increasing `repaint_delay` to `15` or `20`.
+</Tip>
+
+## Mouse Behavior
+
+```conf
+mouse_hide_wait 3.0
+detect_urls yes
+```
+
+- **Hide mouse cursor** after 3 seconds of inactivity
+- **Auto-detect URLs** for Ctrl+Click opening
+
+## Shell Configuration
+
+```conf
+shell zsh
+```
+
+Sets Zsh as the default shell. Change to `bash` or `fish` if preferred.
+
+## Blur Effect (Compositor)
+
+```conf
+[blur]
+background=true
+```
+
+Enables background blur when using a compositor like Sway's built-in compositor.
+
+<Warning>
+Blur effects may impact performance on older hardware. Disable by setting to `false` if you experience lag.
+</Warning>
+
+## Color Scheme
+
+### Including Theme Colors
+
+```conf
+include colors.ini
+```
+
+The `colors.ini` file (if present) defines the 16 ANSI colors used by terminal applications. This file is theme-specific.
+
+### Manual Color Configuration
+
+If not using `colors.ini`, define colors directly:
+
+```conf
+# Basic colors
+background #1e1e2e
+foreground #cdd6f4
+selection_background #585b70
+selection_foreground #cdd6f4
+
+# Black
+color0 #45475a
+color8 #585b70
+
+# Red
+color1 #f38ba8
+color9 #f38ba8
+
+# Green
+color2  #a6e3a1
+color10 #a6e3a1
+
+# Yellow
+color3  #f9e2af
+color11 #f9e2af
+
+# Blue
+color4  #89b4fa
+color12 #89b4fa
+
+# Magenta
+color5  #f5c2e7
+color13 #f5c2e7
+
+# Cyan
+color6  #94e2d5
+color14 #94e2d5
+
+# White
+color7  #bac2de
+color15 #a6adc8
+```
+
+<Note>
+Colors 0-7 are normal variants, while colors 8-15 are bright variants (used with bold text or explicit codes).
+</Note>
+
+## Advanced Configuration
+
+<Accordion title="Font Ligatures">
+
+```conf
+disable_ligatures never
+```
+
+Enables programming ligatures (e.g., `->` renders as →, `!=` as ≠).
+
+**Options:**
+- `never` - Always show ligatures
+- `always` - Never show ligatures
+- `cursor` - Disable ligatures where the cursor is
+
+</Accordion>
+
+<Accordion title="Audio Bell">
+
+```conf
+enable_audio_bell no
+```
+
+Disables the terminal bell sound. Set to `yes` if you want audio alerts.
+
+</Accordion>
+
+<Accordion title="Custom Window Padding">
+
+Add padding inside terminal windows:
+
+```conf
+window_padding_width 8
+```
+
+Creates an 8-pixel padding around the text area.
+
+</Accordion>
+
+<Accordion title="Scrollback">
+
+Configure terminal history:
+
+```conf
+scrollback_lines 10000
+scrollback_pager less --chop-long-lines --RAW-CONTROL-CHARS +INPUT_LINE_NUMBER
+```
+
+- Keeps 10,000 lines of scrollback history
+- Uses `less` for viewing long scrollback
+
+</Accordion>
+
+<Accordion title="Copy/Paste Behavior">
+
+```conf
+copy_on_select yes
+strip_trailing_spaces smart
+```
+
+- **`copy_on_select yes`** - Auto-copy selected text to clipboard
+- **`strip_trailing_spaces smart`** - Remove trailing whitespace intelligently
+
+</Accordion>
+
+## Theme Integration
+
+When you switch themes using `Super + A`, the theme switcher:
+
+1. **Backs up current config:**
+   ```bash
+   cp ~/.config/kitty ~/.config/kitty.bak-<timestamp>
+   ```
+
+2. **Copies theme config:**
+   ```bash
+   cp -a ~/.config/themes/<ThemeName>/kitty/. ~/.config/kitty/
+   ```
+
+3. **Kitty auto-reloads** the configuration (no restart needed)
+
+<Tip>
+Kitty watches its config file for changes and reloads automatically. You'll see colors update instantly when switching themes.
+</Tip>
+
+## Kitty Extensions
+
+### Kittens
+
+Kitty includes utility scripts called "kittens":
+
+#### Diff Files
+
+```bash
+kitty +kitten diff file1.txt file2.txt
+```
+
+Shows a side-by-side diff with syntax highlighting.
+
+#### Image Viewer
+
+```bash
+kitty +kitten icat image.png
+```
+
+Displays images directly in the terminal.
+
+#### SSH Integration
+
+```bash
+kitty +kitten ssh user@hostname
+```
+
+SSH with full Kitty feature support (including image display) on the remote host.
+
+#### Unicode Input
+
+```bash
+kitty +kitten unicode_input
+```
+
+Searchable Unicode character picker.
+
+## Troubleshooting
+
+<Accordion title="Icons/glyphs not rendering">
+
+**Solution:** Install Nerd Font
+
+```bash
+sudo pacman -S ttf-jetbrains-mono-nerd
+```
+
+Verify it's active:
+```bash
+kitty +list-fonts | grep JetBrains
+```
+
+</Accordion>
+
+<Accordion title="Colors not updating after theme switch">
+
+**Force config reload:**
+
+1. Edit `~/.config/kitty/kitty.conf` (add a space)
+2. Save the file
+3. Kitty should reload automatically
+
+Or restart Kitty:
+```bash
+killall kitty
+kitty &
+```
+
+</Accordion>
+
+<Accordion title="Transparency not working">
+
+Ensure your compositor supports transparency:
+
+```bash
+swaymsg -t get_tree | grep app_id.*kitty
+```
+
+Check Kitty config:
+```conf
+background_opacity 0.95  # 0.0 = fully transparent, 1.0 = opaque
+```
+
+</Accordion>
+
+<Accordion title="High CPU usage">
+
+Reduce rendering frequency:
+
+```conf
+repaint_delay 20
+input_delay 5
+```
+
+Disable blur:
+
+```conf
+[blur]
+background=false
+```
+
+</Accordion>
+
+<Accordion title="Clipboard not working">
+
+Verify clipboard manager is running:
+
+```bash
+ps aux | grep wl-copy
+```
+
+Install `wl-clipboard`:
+```bash
+sudo pacman -S wl-clipboard
+```
+
+</Accordion>
+
+## Kitty Tips & Tricks
+
+<Accordion title="Open URLs from terminal output">
+
+**Keyboard:** `Ctrl + Shift + E` opens URL hints mode
+
+Type the letter next to a URL to open it.
+
+</Accordion>
+
+<Accordion title="Search terminal output">
+
+**`Ctrl + Shift + H`** opens scrollback in pager with search enabled.
+
+In pager: Type `/` to search forward, `?` to search backward.
+
+</Accordion>
+
+<Accordion title="Split windows">
+
+Add custom keybindings:
+
+```conf
+map ctrl+shift+s launch --location=split
+map ctrl+shift+v launch --location=vsplit
+```
+
+- **Horizontal split:** `Ctrl + Shift + S`
+- **Vertical split:** `Ctrl + Shift + V`
+
+</Accordion>
+
+<Accordion title="Custom color per session">
+
+Override colors for specific sessions:
+
+```bash
+kitty -o background=#000000 -o foreground=#00ff00
+```
+
+Opens Kitty with black background and green text (Matrix style).
+
+</Accordion>
+
+<Accordion title="Remote file editing">
+
+Edit remote files locally:
+
+```bash
+kitty +kitten ssh user@remote
+# On remote:
+kitty-edit /path/to/remote/file.txt
+```
+
+File opens in your local editor, saves back to remote automatically.
+
+</Accordion>
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Sway Configuration" icon="window" href="/configuration/sway">
+    Terminal launcher keybinding (Super + Enter)
+  </Card>
+  <Card title="Theme System" icon="palette" href="/configuration/themes">
+    How themes update Kitty colors automatically
+  </Card>
+  <Card title="Neovim Configuration" icon="code" href="/configuration/neovim">
+    Editor configuration for terminal development
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+- **[Kitty Documentation](https://sw.kovidgoyal.net/kitty/)** - Official docs
+- **[Kitty Themes](https://github.com/dexpota/kitty-themes)** - Community color schemes
+- **[Nerd Fonts](https://www.nerdfonts.com/)** - Patched fonts with icons
+
+<Tip>
+Explore the full Kitty config with:
+```bash
+kitty --config /dev/null --dump-commands
+```
+This shows all available commands and options.
+</Tip>

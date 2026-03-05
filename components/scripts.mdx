@@ -1,0 +1,313 @@
+---
+title: System Scripts
+description: Utility scripts for automating tasks in Config-Sway
+---
+
+Config-Sway includes several utility scripts to automate common tasks and enhance your Sway experience. These scripts are located in `~/.config/scripts/` and handle autostarting applications, layout management, and wallpaper configuration.
+
+## Available Scripts
+
+### autostart.sh
+
+Automatically launches applications in specific workspaces when Sway starts.
+
+**Location**: `~/.config/scripts/autostart.sh`
+
+#### Features
+
+- Launches Firefox in workspace 1
+- Opens VSCode in workspace 2
+- Starts Kitty terminal in workspace 3
+- Includes error handling and notifications
+
+#### Usage
+
+Add to your Sway config to run on startup:
+
+```bash
+exec ~/.config/scripts/autostart.sh
+```
+
+#### How It Works
+
+<Steps>
+  <Step title="Delay Startup">
+    Waits 2 seconds for Sway to fully initialize
+  </Step>
+  
+  <Step title="Check Dependencies">
+    Verifies `swaymsg` is available
+  </Step>
+  
+  <Step title="Launch Applications">
+    Opens each application in its designated workspace with 1-second delays between launches
+  </Step>
+</Steps>
+
+<CodeGroup>
+```bash Full Script
+#!/usr/bin/env bash
+set -euo pipefail
+
+sleep 2
+
+if ! command -v swaymsg >/dev/null 2>&1; then
+  notify-send "Autostart (Sway)" "swaymsg no disponible" 2>/dev/null || true
+  exit 0
+fi
+
+# Firefox in workspace 1
+swaymsg 'workspace number 1; exec firefox' >/dev/null 2>&1 || true
+sleep 1
+
+# VSCode in workspace 2
+swaymsg 'workspace number 2; exec code' >/dev/null 2>&1 || true
+sleep 1
+
+# Kitty in workspace 3
+swaymsg 'workspace number 3; exec kitty' >/dev/null 2>&1 || true
+```
+
+```bash Customization Example
+# Add your own applications:
+swaymsg 'workspace number 4; exec discord' >/dev/null 2>&1 || true
+sleep 1
+
+swaymsg 'workspace number 5; exec spotify' >/dev/null 2>&1 || true
+```
+</CodeGroup>
+
+---
+
+### mode-hacker.sh
+
+Creates a "hacker" layout with a terminal, clock, and audio visualizer.
+
+**Location**: `~/.config/scripts/mode-hacker.sh`
+
+#### Features
+
+- Creates a three-pane layout
+- Left pane: Full-height Kitty terminal
+- Right top: TTY-clock display
+- Right bottom: Cava audio visualizer
+
+#### Usage
+
+Bind to a keyboard shortcut in your Sway config:
+
+```bash
+bindsym $mod+Shift+h exec ~/.config/scripts/mode-hacker.sh
+```
+
+#### Layout Description
+
+```
+┌─────────────┬─────────┐
+│             │         │
+│             │  Clock  │
+│   Terminal  │         │
+│             ├─────────┤
+│             │         │
+│             │  Cava   │
+└─────────────┴─────────┘
+```
+
+<CodeGroup>
+```bash Full Script
+#!/usr/bin/env bash
+set -euo pipefail
+
+sleep 0.3
+
+if ! command -v swaymsg >/dev/null 2>&1; then
+  notify-send "Mode hacker (Sway)" "swaymsg no disponible" 2>/dev/null || true
+  exit 0
+fi
+
+# Main terminal
+swaymsg 'exec kitty --title x' >/dev/null 2>&1 || true
+sleep 0.35
+
+# Split horizontally and add clock
+swaymsg 'split horizontal' >/dev/null 2>&1 || true
+swaymsg 'exec kitty --override font_size=12 --title clock -- tty-clock -c -C 4' >/dev/null 2>&1 || true
+sleep 0.35
+
+# Split vertically and add cava
+swaymsg 'split vertical' >/dev/null 2>&1 || true
+swaymsg 'exec kitty --title cava -- cava' >/dev/null 2>&1 || true
+```
+
+```bash Required Packages
+# Install dependencies
+sudo pacman -S kitty tty-clock cava  # Arch
+sudo apt install kitty tty-clock cava  # Debian/Ubuntu
+```
+</CodeGroup>
+
+#### Customization
+
+You can modify the clock appearance by changing the `tty-clock` parameters:
+
+- `-c`: Center the clock
+- `-C 4`: Set color (0-7 for different colors)
+- `-t`: Display time only (no date)
+- `-D`: Display date only (no time)
+
+---
+
+### setwallpaper.sh
+
+Sets or restores the wallpaper using `swaybg`.
+
+**Location**: `~/.config/scripts/setwallpaper.sh`
+
+#### Features
+
+- Reads wallpaper path from config file
+- Falls back to default wallpaper if not found
+- Uses solid color as last resort
+- Automatically kills existing `swaybg` process
+
+#### Usage
+
+Run manually or add to Sway config:
+
+```bash
+exec ~/.config/scripts/setwallpaper.sh
+```
+
+#### How It Works
+
+<Steps>
+  <Step title="Read Config">
+    Reads wallpaper path from `~/.config/sway/wallpaper`
+  </Step>
+  
+  <Step title="Check File">
+    Verifies the wallpaper file exists
+  </Step>
+  
+  <Step title="Apply Wallpaper">
+    Kills existing swaybg and launches with new wallpaper
+  </Step>
+  
+  <Step title="Fallback">
+    Uses default wallpaper or solid color if configured wallpaper not found
+  </Step>
+</Steps>
+
+<CodeGroup>
+```bash Full Script
+#!/bin/sh
+
+# Read wallpaper path
+W="$(cat ~/.config/sway/wallpaper 2>/dev/null || true)"
+
+# If exists, load it
+if [ -n "$W" ] && [ -f "$W" ]; then
+    killall swaybg 2>/dev/null || true
+    swaybg -i "$W" -m fill >/dev/null 2>&1 &
+# Fallback to default wallpaper
+elif [ -f ~/.config/wallpapers/arch-linux-logo.webp ]; then
+    killall swaybg 2>/dev/null || true
+    swaybg -i ~/.config/wallpapers/arch-linux-logo.webp -m fill >/dev/null 2>&1 &
+# Last resort: solid color
+else
+    killall swaybg 2>/dev/null || true
+    swaybg -c "#1e1e2e" >/dev/null 2>&1 &
+fi
+```
+
+```bash Set Custom Wallpaper
+# Set your wallpaper path
+echo "/path/to/your/wallpaper.jpg" > ~/.config/sway/wallpaper
+
+# Apply the wallpaper
+~/.config/scripts/setwallpaper.sh
+```
+</CodeGroup>
+
+#### Wallpaper Modes
+
+`swaybg` supports several scaling modes:
+
+- `fill`: Scale to fill the screen (default)
+- `fit`: Scale to fit within screen
+- `stretch`: Stretch to fill screen
+- `center`: Center image without scaling
+- `tile`: Tile image across screen
+
+Modify the script to use a different mode:
+```bash
+swaybg -i "$W" -m fit >/dev/null 2>&1 &
+```
+
+## Integration with Sway Config
+
+Add all scripts to your `~/.config/sway/config`:
+
+```bash
+# Autostart applications
+exec ~/.config/scripts/autostart.sh
+
+# Set wallpaper on startup
+exec ~/.config/scripts/setwallpaper.sh
+
+# Bind hacker mode to Super+Shift+H
+bindsym $mod+Shift+h exec ~/.config/scripts/mode-hacker.sh
+```
+
+## Troubleshooting
+
+### Script Not Executing
+
+Ensure scripts have execute permissions:
+```bash
+chmod +x ~/.config/scripts/*.sh
+```
+
+### Applications Not Launching
+
+Check if the applications are installed:
+```bash
+command -v firefox
+command -v code
+command -v kitty
+```
+
+### Wallpaper Not Loading
+
+Verify `swaybg` is installed:
+```bash
+which swaybg
+```
+
+Check the wallpaper path:
+```bash
+cat ~/.config/sway/wallpaper
+ls -la "$(cat ~/.config/sway/wallpaper)"
+```
+
+## Creating Custom Scripts
+
+You can create your own scripts following the same patterns:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail  # Exit on error, undefined variables, pipe failures
+
+# Check for required commands
+if ! command -v swaymsg >/dev/null 2>&1; then
+  notify-send "My Script" "swaymsg not available"
+  exit 1
+fi
+
+# Your script logic here
+swaymsg 'your commands'
+```
+
+<Note>
+  Always use error handling and notifications to help debug issues.
+</Note>

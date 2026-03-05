@@ -1,0 +1,135 @@
+---
+title: Anime Theme
+description: A vibrant blue-accented theme inspired by anime aesthetics
+---
+
+# Anime Theme
+
+The Anime theme brings a vibrant, modern aesthetic to your Sway desktop with its distinctive blue accents and dark background inspired by popular anime color palettes.
+
+<Card title="Theme Overview" icon="palette">
+  A cohesive dark theme featuring blue accent colors (#89b4fa) with a deep purple-tinted background (#1e1e2e), creating a comfortable viewing experience for extended use.
+</Card>
+
+## Color Scheme
+
+The Anime theme uses a carefully selected palette that creates visual harmony across all components:
+
+### Primary Colors
+
+- **Background**: `#1e1e2e` - Deep purple-tinted dark gray
+- **Foreground**: `#cdd6f4` - Light lavender blue text
+- **Active/Selected**: `#89b4fa` - Vibrant sky blue
+- **Inactive**: `#45475a` - Muted gray
+
+### Waybar Colors
+
+- **Base**: `rgba(30, 30, 46, 1)` - Solid dark background
+- **Mantle**: `#181825` - Darker secondary background
+- **Crust**: `#11111b` - Deepest background layer
+- **Text**: `#cdd6f4` - Primary text color
+- **Mauve**: `#a6dcf7` - Light blue accent
+- **Sky**: `#89dceb` - Cyan highlight
+- **Red**: `#f38ba8` - Warning/error indicator
+- **Green**: `#a6e3a1` - Success indicator
+
+### Terminal Colors (Kitty)
+
+The theme includes a full 16-color terminal palette:
+
+<Note>
+The Kitty configuration uses a Tokyo Night-inspired color scheme with the following characteristics:
+- **Foreground**: `#a9b1d6` - Soft blue-gray text
+- **Background**: `#1a1b26` - Dark navy background
+- **Cursor**: `#c0caf5` with underline style
+</Note>
+
+**ANSI Colors**:
+- Black: `#414868`
+- Red: `#f7768e`
+- Green: `#73daca`
+- Yellow: `#e0af68`
+- Blue: `#7aa2f7`
+- Magenta: `#bb9af7`
+- Cyan: `#7dcfff`
+- White: `#c0caf5`
+
+## Theme Structure
+
+The Anime theme includes configurations for all major desktop components:
+
+### Directory Layout
+
+```
+themes/Anime/
+├── sway/
+│   └── theme.conf           # Window manager colors and borders
+├── waybar/
+│   ├── config.jsonc         # Status bar configuration
+│   ├── style.css            # Status bar styling
+│   └── colors.css           # Color definitions
+├── kitty/
+│   ├── kitty.conf           # Terminal settings
+│   └── colors.ini           # Terminal color palette
+├── rofi-style/
+│   ├── _core/
+│   │   └── palette.rasi     # Rofi color palette
+│   ├── theme-switcher.rasi  # Theme switcher menu
+│   ├── selector-app.rasi    # Application launcher
+│   └── power-menu.rasi      # Power menu styling
+└── wallpaper.jpg            # Theme wallpaper
+```
+
+### Sway Configuration
+
+The theme configures Sway with:
+
+- **Border Width**: 2px borders for both normal and floating windows
+- **Gaps**: 5px inner gaps, 10px outer gaps
+- **Window Decorations**: Blue borders on focused windows, gray on inactive
+
+### Rofi Configuration
+
+<Info>
+Rofi menus use the JetBrains Mono Nerd Font at 14pt size for consistent iconography and readability.
+</Info>
+
+## Activation
+
+Activate the Anime theme using the Config-Sway theme switcher:
+
+```bash
+# Using the theme switcher
+Super + Shift + T  # Opens theme selector
+# Select "Anime" from the menu
+```
+
+Or manually via command line:
+
+```bash
+~/.config/sway/scripts/theme-switcher.sh Anime
+```
+
+<Note>
+After switching themes, Sway will automatically reload the configuration. Open applications may need to be restarted to fully adopt the new color scheme.
+</Note>
+
+## Customization
+
+To customize the Anime theme:
+
+1. **Modify Colors**: Edit `~/.config/themes/Anime/sway/theme.conf` to change the core color variables
+2. **Adjust Waybar**: Customize `~/.config/themes/Anime/waybar/colors.css` for status bar appearance
+3. **Terminal Palette**: Edit `~/.config/themes/Anime/kitty/colors.ini` for terminal colors
+4. **Change Wallpaper**: Replace `~/.config/themes/Anime/wallpaper.jpg` with your preferred image
+
+<Card title="Pro Tip" icon="lightbulb">
+  After modifying theme files, reload Sway with `Super + Shift + R` or reselect the theme to apply your changes.
+</Card>
+
+## Visual Characteristics
+
+- **Aesthetic**: Modern, vibrant, anime-inspired
+- **Contrast**: High contrast with bright blue accents
+- **Best For**: Extended coding sessions, media consumption
+- **Mood**: Energetic and focused

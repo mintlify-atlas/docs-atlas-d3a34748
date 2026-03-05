@@ -1,0 +1,391 @@
+---
+title: Installation
+description: Install Config-Sway on your Arch Linux system with automated setup scripts
+---
+
+## Prerequisites
+
+Before installing Config-Sway, ensure you have:
+
+<Note>
+Config-Sway is designed for **Arch Linux**. The `install.sh` script uses `pacman` for package management. If you're on another distribution, you'll need to manually install the required packages using your package manager.
+</Note>
+
+### Required Software
+
+- **Arch Linux** (or Arch-based distribution)
+- **Git** (to clone the repository)
+- **sudo privileges** (for installing system packages)
+- **rsync** (installed automatically by the script)
+
+### System Requirements
+
+- A system capable of running Wayland compositors
+- GPU drivers with Wayland support
+- At least 2GB of free disk space for packages and configuration files
+
+## Installation Methods
+
+### Method 1: Automated Installation (Recommended)
+
+The `install.sh` script handles everything: installing dependencies and applying your dotfiles.
+
+<Steps>
+<Step title="Clone the repository">
+First, clone the Config-Sway repository to your local machine:
+
+```bash
+git clone <your-repo-url> config-sway
+cd config-sway
+```
+</Step>
+
+<Step title="Run the installation script">
+Make the script executable and run it:
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+The script will:
+- Install all required packages using `pacman`
+- Automatically run `update.sh` to apply your dotfiles
+- Create backups of your existing configuration
+</Step>
+
+<Step title="Verify the installation">
+Check that Sway and related tools are installed:
+
+```bash
+sway --version
+waybar --version
+rofi -version
+```
+</Step>
+</Steps>
+
+### Method 2: Manual Installation
+
+If you prefer manual control or are not on Arch Linux, follow these steps:
+
+<Steps>
+<Step title="Install required packages">
+On Arch Linux, install all dependencies:
+
+```bash
+sudo pacman -S sway swaybg waybar mako kitty rofi flameshot \
+  network-manager-applet xdg-desktop-portal xdg-desktop-portal-wlr \
+  xdg-desktop-portal-gtk grim rsync brightnessctl playerctl \
+  blueman swaylock ranger lsd bat fastfetch mpc alsa-utils libnotify
+```
+
+For other distributions, install the equivalent packages using your package manager.
+</Step>
+
+<Step title="Clone the repository">
+```bash
+git clone <your-repo-url> config-sway
+cd config-sway
+```
+</Step>
+
+<Step title="Apply the dotfiles">
+```bash
+chmod +x update.sh
+./update.sh
+```
+</Step>
+</Steps>
+
+## What Gets Installed
+
+### Core Packages
+
+The `install.sh` script installs the following packages:
+
+<CodeGroup>
+```bash Window Manager & Bar
+sway          # Tiling Wayland compositor
+swaybg        # Wallpaper utility for Sway
+waybar        # Highly customizable status bar
+mako          # Notification daemon for Wayland
+```
+
+```bash Applications
+kitty         # GPU-accelerated terminal emulator
+rofi          # Application launcher and menu system
+flameshot     # Screenshot tool
+network-manager-applet  # Network management GUI
+```
+
+```bash Wayland Portals
+xdg-desktop-portal      # Desktop integration portals
+xdg-desktop-portal-wlr  # wlroots-specific portal implementation
+xdg-desktop-portal-gtk  # GTK portal implementation
+grim                    # Screenshot tool for Wayland
+```
+
+```bash Utilities
+rsync           # File synchronization tool
+brightnessctl   # Brightness control
+playerctl       # Media player controller
+blueman         # Bluetooth manager
+swaylock        # Screen locker for Sway
+ranger          # Terminal file manager
+lsd             # Modern ls replacement
+bat             # Cat clone with syntax highlighting
+fastfetch       # System information tool
+mpc             # MPD client
+alsa-utils      # ALSA utilities
+libnotify       # Desktop notification library
+```
+</CodeGroup>
+
+## Understanding install.sh
+
+The installation script is straightforward and safe:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Fails immediately on errors, undefined variables, or pipe failures
+
+PKGS=(
+  sway swaybg waybar mako kitty rofi flameshot network-manager-applet
+  xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk grim
+  rsync brightnessctl playerctl blueman swaylock
+  ranger lsd bat fastfetch mpc alsa-utils libnotify
+)
+
+# Installs packages with pacman
+sudo pacman -S --needed "${PKGS[@]}"
+
+# Applies your dotfiles
+./update.sh
+```
+
+<Note>
+The `--needed` flag prevents reinstallation of already-installed packages, making the script safe to run multiple times.
+</Note>
+
+## Applying Configuration with update.sh
+
+The `update.sh` script synchronizes your dotfiles from the repository to your home directory.
+
+### What update.sh Does
+
+<Steps>
+<Step title="Creates automatic backups">
+Before making any changes, `update.sh` backs up your existing configuration:
+
+- `~/.config` → `~/.config.bak-YYYYMMDD-HHMMSS/`
+- Home dotfiles → `~/home-dots.bak-YYYYMMDD-HHMMSS/`
+
+<Warning>
+Backups can consume significant disk space. Clean up old backups periodically to free up space.
+</Warning>
+</Step>
+
+<Step title="Syncs managed configuration files">
+The script uses `rsync --delete` to synchronize:
+
+- `./.config/` → `~/.config/` (only top-level directories managed by the repo)
+- `./home/` → `~/` (only first-level files managed by the repo)
+
+Managed files are tracked in:
+- `~/.config/.config-sway-managed`
+- `~/.home-dots-managed`
+</Step>
+
+<Step title="Removes deleted files">
+If you've removed files from the repository, `update.sh` removes them from your system too—but **only** for files it manages. Your other configurations remain untouched.
+</Step>
+
+<Step title="Reloads services">
+After syncing, the script automatically:
+
+- Restarts `xdg-desktop-portal` and `xdg-desktop-portal-wlr`
+- Reloads Sway configuration (`swaymsg reload`)
+- Restarts Waybar
+</Step>
+</Steps>
+
+### Running update.sh
+
+<CodeGroup>
+```bash Standard (with backup)
+./update.sh
+```
+
+```bash Skip backup
+./update.sh --no-backup
+```
+</CodeGroup>
+
+<Note>
+Use `--no-backup` only if you're certain you don't need to revert changes. This is useful after you've verified that the configuration works correctly.
+</Note>
+
+## Repository Structure
+
+Understand what gets synchronized to your system:
+
+| Repository Path | System Destination | Contents |
+|----------------|-------------------|----------|
+| `./.config/` | `~/.config/` | Sway, Waybar, Rofi, Kitty, Neovim configs |
+| `./home/` | `~/` | Top-level dotfiles (e.g., `.zshrc`) |
+| `./.config/themes/<theme>/` | `~/.config/themes/<theme>/` | Theme resources (colors, wallpapers, styles) |
+
+### Configuration Files Included
+
+- **Sway**: Window manager configuration, keybindings, autostart
+- **Waybar**: Status bar configuration and styling
+- **Rofi**: Application launcher and custom menus
+- **Kitty**: Terminal emulator configuration
+- **Mako**: Notification daemon settings
+- **Theme system**: Unified theming for all components
+
+## Backups
+
+### Automatic Backups
+
+By default, `update.sh` creates timestamped backups:
+
+```bash
+~/.config.bak-20260305-143052/
+~/home-dots.bak-20260305-143052/
+```
+
+### Restoring from Backup
+
+If you need to revert your configuration:
+
+```bash
+# Remove current config
+rm -rf ~/.config
+
+# Restore from backup (replace timestamp with your backup)
+cp -a ~/.config.bak-20260305-143052 ~/.config
+```
+
+<Warning>
+Test your configuration after updates. If something breaks, restore from your backup before the next `update.sh` run (which creates a new backup).
+</Warning>
+
+## Troubleshooting
+
+### Flameshot Not Working
+
+If Flameshot screenshots fail under Wayland:
+
+<Steps>
+<Step title="Verify portal configuration">
+Check that `~/.config/xdg-desktop-portal/sway-portals.conf` exists and contains:
+
+```ini
+[preferred]
+default=gtk
+org.freedesktop.impl.portal.Screenshot=wlr
+org.freedesktop.impl.portal.ScreenCast=wlr
+```
+</Step>
+
+<Step title="Restart portal services">
+```bash
+systemctl --user restart xdg-desktop-portal xdg-desktop-portal-wlr
+```
+</Step>
+
+<Step title="Check Sway configuration">
+Verify your Sway config imports environment variables correctly and includes the floating rule for Flameshot.
+</Step>
+</Steps>
+
+### rsync Missing
+
+If you get an error about rsync:
+
+```bash
+sudo pacman -S rsync
+```
+
+Then run `./update.sh` again.
+
+### Permission Denied
+
+If scripts aren't executable:
+
+```bash
+chmod +x install.sh update.sh
+```
+
+### Sway Won't Start
+
+<Steps>
+<Step title="Check Sway logs">
+```bash
+journalctl --user -u sway -b
+```
+</Step>
+
+<Step title="Verify GPU drivers">
+Ensure your GPU drivers support Wayland:
+
+```bash
+# For NVIDIA (not recommended for Wayland)
+lsmod | grep nvidia
+
+# For AMD/Intel (recommended)
+lsmod | grep -E '(amdgpu|i915)'
+```
+</Step>
+
+<Step title="Test with default config">
+```bash
+# Move your config temporarily
+mv ~/.config/sway ~/.config/sway.backup
+
+# Try starting Sway with default config
+sway
+```
+</Step>
+</Steps>
+
+### Package Installation Fails
+
+If `pacman` fails to install packages:
+
+```bash
+# Update package database
+sudo pacman -Sy
+
+# Try installing packages individually to identify the problem
+sudo pacman -S sway
+sudo pacman -S waybar
+# ... etc
+```
+
+## Next Steps
+
+Now that you've installed Config-Sway, learn how to use it:
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+  Get Sway running and learn essential keybindings to navigate your new desktop environment.
+</Card>
+
+## Environment Variables
+
+For optimal Wayland compatibility, set these environment variables before starting Sway:
+
+```bash
+export XDG_CURRENT_DESKTOP=sway
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=sway
+export MOZ_ENABLE_WAYLAND=1
+export QT_QPA_PLATFORM=wayland
+export SDL_VIDEODRIVER=wayland
+```
+
+You can add these to `~/.config/environment.d/sway.conf` (one per line, format: `KEY=value`) or to your shell profile.

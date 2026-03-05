@@ -1,0 +1,506 @@
+---
+title: Rofi Menu Scripts
+description: Interactive Rofi menus for application launching, power management, theme switching, and more
+---
+
+Config-Sway includes several Rofi-based menu scripts that provide a beautiful, user-friendly interface for common tasks. These scripts are located in `~/.config/rofi/scripts/` and integrate seamlessly with the Sway window manager.
+
+## Available Menus
+
+### selector-app.sh
+
+Application launcher with icon support.
+
+**Location**: `~/.config/rofi/scripts/selector-app.sh`
+
+#### Features
+
+- Displays installed applications with icons
+- Searches applications by name
+- Custom theme with background image
+- Fast application launching
+
+#### Usage
+
+Bind to a keyboard shortcut in Sway config:
+
+```bash
+bindsym $mod+d exec ~/.config/rofi/scripts/selector-app.sh
+```
+
+<CodeGroup>
+```bash Full Script
+#!/usr/bin/env bash
+set -euo pipefail
+
+CORE_THEME="$HOME/.config/rofi/styles/_core/selector-app.rasi"
+IMG="$HOME/.config/rofi/images/arch-linux.png"
+
+if [ -f "$IMG" ]; then
+  rofi -show drun -show-icons -theme "$CORE_THEME" \
+    -theme-str "imagebox { background-image: url(\"$IMG\", height); }"
+else
+  rofi -show drun -show-icons -theme "$CORE_THEME"
+fi
+```
+
+```bash Sway Config Binding
+# Application launcher
+bindsym $mod+d exec ~/.config/rofi/scripts/selector-app.sh
+
+# Alternative: Super key
+bindsym $mod exec ~/.config/rofi/scripts/selector-app.sh
+```
+</CodeGroup>
+
+---
+
+### power-menu.sh
+
+Power management menu for system operations.
+
+**Location**: `~/.config/rofi/scripts/power-menu.sh`
+
+#### Features
+
+- Shutdown, reboot, suspend, lock, and logout options
+- Shows last login time and system uptime
+- Custom background image
+- Safe with confirmation dialogs
+
+#### Usage
+
+```bash
+bindsym $mod+Shift+e exec ~/.config/rofi/scripts/power-menu.sh
+```
+
+#### Menu Options
+
+- **Shutdown** (`systemctl poweroff`) - Power off the system
+- **Reboot** (`systemctl reboot`) - Restart the system  
+- **Suspend** (`systemctl suspend`) - Suspend to RAM
+- **Lock** (`swaylock`) - Lock the screen
+- **Logout** (`swaymsg exit`) - Exit Sway session
+- **Cancel** - Close the menu
+
+<CodeGroup>
+```bash Full Script
+#!/usr/bin/env bash
+set -euo pipefail
+
+theme="$HOME/.config/rofi/styles/_core/power-menu.rasi"
+bg="$HOME/.config/rofi/images/arch-linux-2.webp"
+
+# Get system info
+lastlogin="$(last "$USER" 2>/dev/null | head -n1 | tr -s ' ' | cut -d' ' -f5,6,7)"
+uptime="$(uptime -p 2>/dev/null | sed -e 's/^up //g')"
+host="$(hostname || uname -n)"
+
+# Menu icons
+apagar=' '
+reiniciar='󰦛 '
+bloquear='󱅞'
+suspender='󰽥'
+cerrar_seccion='󰍂 '
+cancelar=' '
+
+# Display menu
+chosen="$(echo -e "$cancelar\n$apagar\n$reiniciar\n$suspender\n$cerrar_seccion\n$bloquear" | \
+  rofi -dmenu -p "$USER@$host" \
+  -mesg " Desde: $lastlogin, Tiempo encendido: $uptime" \
+  -theme "$theme")"
+
+# Execute choice
+case "$chosen" in
+  "$apagar") systemctl poweroff ;;
+  "$reiniciar") systemctl reboot ;;
+  "$bloquear") swaylock -f ;;
+  "$suspender")
+    mpc -q pause 2>/dev/null || true
+    amixer set Master mute 2>/dev/null || true
+    systemctl suspend
+    ;;
+  "$cerrar_seccion") swaymsg exit ;;
+  *) exit 0 ;;
+esac
+```
+
+```bash Sway Config
+# Power menu
+bindsym $mod+Shift+e exec ~/.config/rofi/scripts/power-menu.sh
+
+# Quick lock (without menu)
+bindsym $mod+l exec swaylock -f
+```
+</CodeGroup>
+
+<Note type="warning">
+  The power menu requires `systemctl`, `swaylock`, and optionally `mpc` and `amixer` for full functionality.
+</Note>
+
+---
+
+### menu-iconos.sh
+
+Emoji and icon picker.
+
+**Location**: `~/.config/rofi/scripts/menu-iconos.sh`
+
+#### Features
+
+- 1200+ emojis organized by category
+- Searchable by name (in Spanish)
+- Copies emoji to clipboard
+- Auto-types emoji at cursor position
+- Works with Wayland via `wl-copy` and `wtype`
+
+#### Usage
+
+```bash
+bindsym $mod+period exec ~/.config/rofi/scripts/menu-iconos.sh
+```
+
+#### Categories
+
+- Faces and expressions
+- Hand gestures
+- People and body parts
+- Animals and nature
+- Food and drink
+- Activities and sports
+- Travel and places
+- Objects and symbols
+- Flags
+
+<CodeGroup>
+```bash Usage Example
+# Open emoji picker
+~/.config/rofi/scripts/menu-iconos.sh
+
+# Type to search: "feliz" -> shows 😀 😁 😃 😄 etc.
+# Select emoji -> automatically typed and copied
+```
+
+```bash Dependencies
+# Install required tools
+sudo pacman -S wl-clipboard wtype rofi  # Arch
+sudo apt install wl-clipboard wtype rofi  # Debian/Ubuntu
+```
+
+```bash Sway Bindings
+# Emoji picker
+bindsym $mod+period exec ~/.config/rofi/scripts/menu-iconos.sh
+
+# Alternative: Ctrl+Alt+E
+bindsym Ctrl+Mod1+e exec ~/.config/rofi/scripts/menu-iconos.sh
+```
+</CodeGroup>
+
+---
+
+### theme-switcher.sh
+
+System-wide theme switcher.
+
+**Location**: `~/.config/rofi/scripts/theme-switcher.sh`
+
+#### Features
+
+- Switches themes for Kitty, Waybar, Rofi, and Sway
+- Visual preview of themes with wallpaper thumbnails
+- Automatic configuration backup
+- Applies wallpaper with `swaybg`
+- Restarts Waybar and reloads Sway
+
+#### Usage
+
+```bash
+bindsym $mod+t exec ~/.config/rofi/scripts/theme-switcher.sh
+```
+
+#### Theme Structure
+
+Themes are stored in `~/.config/themes/` with this structure:
+
+```
+~/.config/themes/
+├── theme-name/
+│   ├── kitty/
+│   │   └── current-theme.conf
+│   ├── waybar/
+│   │   ├── colors.css
+│   │   ├── style.css
+│   │   └── config.jsonc
+│   ├── sway/
+│   │   └── theme.conf
+│   ├── rofi-style/
+│   │   └── _core/
+│   │       └── palette.rasi
+│   └── wallpaper.jpg|png|webp
+```
+
+<Steps>
+  <Step title="Browse Themes">
+    The script scans `~/.config/themes/` for available themes and displays them with wallpaper previews
+  </Step>
+  
+  <Step title="Select Theme">
+    Choose a theme from the Rofi menu
+  </Step>
+  
+  <Step title="Backup Configs">
+    Automatically backs up your current configuration with timestamp
+  </Step>
+  
+  <Step title="Apply Theme">
+    Copies theme files to active config directories and applies changes
+  </Step>
+  
+  <Step title="Reload">
+    Restarts Waybar and reloads Sway to apply the new theme
+  </Step>
+</Steps>
+
+<CodeGroup>
+```bash Script Workflow
+#!/usr/bin/env bash
+# 1. Scan themes directory
+# 2. Show themes with wallpaper preview
+# 3. User selects theme
+# 4. Backup current configs
+# 5. Copy kitty, waybar, sway, rofi configs
+# 6. Apply wallpaper with swaybg
+# 7. Restart waybar
+# 8. Reload sway
+```
+
+```bash Create Custom Theme
+# Create theme directory
+mkdir -p ~/.config/themes/my-theme/{kitty,waybar,sway}
+
+# Add wallpaper
+cp /path/to/wallpaper.jpg ~/.config/themes/my-theme/wallpaper.jpg
+
+# Copy current configs as base
+cp -r ~/.config/kitty/* ~/.config/themes/my-theme/kitty/
+cp ~/.config/waybar/colors.css ~/.config/themes/my-theme/waybar/
+cp ~/.config/waybar/style.css ~/.config/themes/my-theme/waybar/
+cp ~/.config/waybar/config-sway.jsonc ~/.config/themes/my-theme/waybar/config.jsonc
+
+# Edit colors and styles as desired
+# Then use theme-switcher.sh to apply
+```
+
+```bash Manual Theme Switch
+# Switch to specific theme without menu
+~/.config/rofi/scripts/theme-switcher.sh "theme-name"
+```
+</CodeGroup>
+
+<Note>
+  The script automatically converts Waybar configs from Hyprland to Sway format by replacing module names.
+</Note>
+
+---
+
+### wallpaper-switcher.sh
+
+Wallpaper browser and switcher.
+
+**Location**: `~/.config/rofi/scripts/wallpaper-switcher.sh`
+
+#### Features
+
+- Visual wallpaper browser with thumbnails
+- Searches wallpapers in `~/.config/wallpapers/`
+- Applies wallpaper instantly with `swaybg`
+- Saves wallpaper choice for persistence
+- Notification with preview
+
+#### Usage
+
+```bash
+bindsym $mod+w exec ~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+<CodeGroup>
+```bash Full Script
+#!/usr/bin/env bash
+set -euo pipefail
+
+FONDOS_DIR="$HOME/.config/wallpapers"
+THEME_PATH="$HOME/.config/rofi/styles/_core/wallpaper-switcher.rasi"
+SWAY_WALL_FILE="$HOME/.config/sway/wallpaper"
+
+# Find wallpapers
+for img in "$FONDOS_DIR"/*; do
+  name="$(basename "$img")"
+  printf '%s\0icon\x1f%s\n' "$name" "$img"
+done | rofi -i -dmenu -show-icons -p "> " -theme "$THEME_PATH"
+
+# Apply selected wallpaper
+WALL="$FONDOS_DIR/$FONDO"
+echo "$WALL" > "$SWAY_WALL_FILE"
+killall swaybg 2>/dev/null || true
+swaybg -i "$WALL" -m fill >/dev/null 2>&1 &
+```
+
+```bash Add Wallpapers
+# Create wallpapers directory
+mkdir -p ~/.config/wallpapers
+
+# Add your wallpapers
+cp /path/to/images/*.jpg ~/.config/wallpapers/
+cp /path/to/images/*.png ~/.config/wallpapers/
+```
+
+```bash Supported Formats
+# The script supports all image formats that swaybg can handle:
+- JPEG (.jpg, .jpeg)
+- PNG (.png)
+- WebP (.webp)
+- BMP (.bmp)
+- GIF (.gif) - static images only
+```
+</CodeGroup>
+
+## Configuration
+
+### Rofi Theme Customization
+
+All Rofi menus use themes from `~/.config/rofi/styles/_core/`:
+
+- `selector-app.rasi` - Application launcher theme
+- `power-menu.rasi` - Power menu theme
+- `menu-iconos.rasi` - Emoji picker theme
+- `theme-switcher.rasi` - Theme browser theme
+- `wallpaper-switcher.rasi` - Wallpaper browser theme
+- `palette.rasi` - Color palette (auto-generated or custom)
+
+Edit these files to customize appearance:
+
+```css
+/* ~/.config/rofi/styles/_core/palette.rasi */
+* {
+    font: "JetBrains Mono Nerd Font 12";
+    background: #1e1e2e;
+    foreground: #89b3fa;
+    selected: #89b3fa;
+}
+```
+
+### Sway Keybindings
+
+Recommended keybindings for `~/.config/sway/config`:
+
+```bash
+# Rofi menus
+bindsym $mod+d exec ~/.config/rofi/scripts/selector-app.sh
+bindsym $mod+Shift+e exec ~/.config/rofi/scripts/power-menu.sh
+bindsym $mod+period exec ~/.config/rofi/scripts/menu-iconos.sh
+bindsym $mod+t exec ~/.config/rofi/scripts/theme-switcher.sh
+bindsym $mod+w exec ~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+## Troubleshooting
+
+### Rofi Not Launching
+
+Verify Rofi is installed:
+```bash
+which rofi
+rofi -version
+```
+
+### Icons Not Showing
+
+Ensure an icon theme is installed:
+```bash
+# Install icon theme (Arch)
+sudo pacman -S papirus-icon-theme
+
+# Update icon cache
+gtk-update-icon-cache
+```
+
+### Wallpaper Not Applying
+
+Check `swaybg` is running:
+```bash
+ps aux | grep swaybg
+```
+
+Verify wallpaper path:
+```bash
+cat ~/.config/sway/wallpaper
+```
+
+### Theme Switcher Errors
+
+Ensure theme directory exists:
+```bash
+ls -la ~/.config/themes/
+```
+
+Check for required files in theme:
+```bash
+find ~/.config/themes/your-theme -type f
+```
+
+### Emoji Picker Not Working
+
+Install Wayland clipboard tools:
+```bash
+# Arch
+sudo pacman -S wl-clipboard wtype
+
+# Debian/Ubuntu  
+sudo apt install wl-clipboard wtype
+```
+
+## Creating Custom Rofi Scripts
+
+You can create your own Rofi menus following this template:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Define options
+OPTIONS="Option 1\nOption 2\nOption 3"
+
+# Show menu
+CHOSEN="$(echo -e "$OPTIONS" | rofi -dmenu -p "Select:" -theme ~/.config/rofi/styles/_core/your-theme.rasi)"
+
+# Handle selection
+case "$CHOSEN" in
+  "Option 1") 
+    # Your action here
+    ;;
+  "Option 2")
+    # Your action here
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+```
+
+<Note type="info">
+  For more Rofi customization options, see the [Rofi documentation](https://github.com/davatorium/rofi).
+</Note>
+
+## Integration with Other Tools
+
+The Rofi scripts integrate with:
+
+- **Sway** - Window manager control
+- **Waybar** - Status bar theming
+- **Kitty** - Terminal theming
+- **swaybg** - Wallpaper management
+- **swaylock** - Screen locking
+- **systemctl** - System power management
+- **wl-clipboard** - Wayland clipboard
+- **wtype** - Text input simulation
+
+Ensure these tools are installed for full functionality.

@@ -1,0 +1,586 @@
+---
+title: Customization Guide
+description: Customize Config-Sway to match your workflow and preferences
+icon: wrench
+---
+
+# Customization Guide
+
+Config-Sway is designed to be highly customizable while maintaining a consistent and coherent configuration structure. This guide covers common customization scenarios and best practices.
+
+## Configuration File Locations
+
+All configuration files are located in `~/.config/`:
+
+| Component | Configuration File(s) | Purpose |
+|-----------|---------------------|----------|
+| **Sway** | `~/.config/sway/config` | Window manager settings and keybindings |
+| **Sway Theme** | `~/.config/sway/theme.conf` | Colors, borders, and gaps (managed by theme system) |
+| **Waybar** | `~/.config/waybar/config-sway.jsonc` | Status bar layout and modules |
+| **Waybar Style** | `~/.config/waybar/style.css` | Status bar visual styling |
+| **Waybar Colors** | `~/.config/waybar/colors.css` | Status bar color variables |
+| **Kitty** | `~/.config/kitty/kitty.conf` | Terminal emulator settings |
+| **Rofi** | `~/.config/rofi/styles/` | Application launcher styles |
+| **Mako** | `~/.config/mako/config` | Notification daemon settings |
+
+<Warning>
+Files managed by the theme system (`theme.conf`, Waybar colors, Kitty colors) will be overwritten when you switch themes. Make theme-specific customizations in the theme directories instead.
+</Warning>
+
+## Customizing Keybindings
+
+### Adding New Keybindings
+
+Edit `~/.config/sway/config` and add your keybindings:
+
+```bash
+# Add after line 33
+bindsym $mod+Shift+F exec thunar  # Open file manager
+bindsym $mod+B exec brave         # Open Brave browser
+bindsym $mod+T exec telegram      # Open Telegram
+```
+
+<Tip>
+Group related keybindings together with comments for better organization. The default config groups bindings by category (Applications, Windows, Menus, etc.).
+</Tip>
+
+### Changing Existing Keybindings
+
+Find and modify existing bindings:
+
+```bash
+# Change terminal from Kitty to Alacritty
+# Original (line 12):
+bindsym $mod+Return exec kitty
+
+# Modified:
+bindsym $mod+Return exec alacritty
+```
+
+### Using Different Modifier Keys
+
+Change the modifier key in `~/.config/sway/config:5`:
+
+```bash
+# Default: Super/Windows key
+set $mod Mod4
+
+# Alternative: Alt key
+set $mod Mod1
+```
+
+### Vim-Style Navigation Alternatives
+
+If you prefer arrow keys over HJKL:
+
+```bash
+# Replace HJKL variables (lines 6-9)
+set $left Left
+set $down Down
+set $up Up
+set $right Right
+```
+
+<Tip>
+You can keep both HJKL and arrow key bindings by adding duplicate bindings with arrow keys. This provides flexibility without losing Vim-style navigation.
+</Tip>
+
+## Customizing Appearance
+
+### Window Borders and Gaps
+
+These settings are in `~/.config/sway/theme.conf` (managed by theme system):
+
+```bash
+# Border thickness
+default_border pixel 2          # Normal windows
+default_floating_border pixel 2 # Floating windows
+
+# Gap sizes
+gaps inner 5   # Space between windows
+gaps outer 10  # Space from screen edges
+```
+
+To make permanent changes across themes, edit each theme's `sway/theme.conf`:
+
+```bash
+# Edit all themes at once
+for theme in ~/.config/themes/*/sway/theme.conf; do
+    sed -i 's/gaps inner 5/gaps inner 10/' "$theme"
+    sed -i 's/gaps outer 10/gaps outer 15/' "$theme"
+done
+```
+
+### Custom Window Colors
+
+Edit theme color variables in `~/.config/sway/theme.conf`:
+
+```bash
+# Color variables
+set $bg #1e1e2e       # Background color
+set $fg #cdd6f4       # Foreground/text color
+set $active #89b4fa   # Active window border
+set $inactive #45475a # Inactive window border
+
+# Window border colors
+client.focused          $active   $active   $fg      $active   $active
+client.focused_inactive $inactive $inactive $fg      $inactive $inactive
+client.unfocused        $inactive $inactive $fg      $inactive $inactive
+```
+
+### Font Configuration
+
+Change the system font in theme files:
+
+```bash
+# In ~/.config/sway/theme.conf (some themes)
+font pango:JetBrains Mono Nerd Font 14
+
+# Alternative fonts:
+font pango:Fira Code 12
+font pango:Iosevka Nerd Font 13
+```
+
+## Customizing Waybar
+
+### Adding New Modules
+
+Edit `~/.config/waybar/config-sway.jsonc` to add modules:
+
+```json
+{
+  "modules-left": ["sway/workspaces", "sway/mode"],
+  "modules-center": ["sway/window"],
+  "modules-right": [
+    "cpu",
+    "memory",
+    "temperature",  // Add temperature
+    "disk",          // Add disk usage
+    "network",
+    "pulseaudio",
+    "battery",
+    "clock"
+  ],
+  
+  // Add module configurations
+  "temperature": {
+    "critical-threshold": 80,
+    "format": "{icon} {temperatureC}°C",
+    "format-icons": ["󱃃", "󰔏", "󱃂"]
+  },
+  "disk": {
+    "format": "󰋊 {percentage_used}%",
+    "path": "/"
+  }
+}
+```
+
+<Tip>
+See the [Waybar wiki](https://github.com/Alexays/Waybar/wiki) for a complete list of available modules and their configuration options.
+</Tip>
+
+### Customizing Waybar Style
+
+Edit `~/.config/waybar/style.css` for visual customization:
+
+```css
+/* Change bar height */
+#waybar {
+    font-size: 14px;
+    min-height: 30px;  /* Adjust bar height */
+}
+
+/* Customize workspace buttons */
+#workspaces button {
+    padding: 0 8px;
+    border-radius: 8px;
+}
+
+#workspaces button.focused {
+    background: @active;
+    color: @bg;
+}
+
+/* Style specific modules */
+#battery.charging {
+    color: #a6e3a1;  /* Green when charging */
+}
+
+#battery.warning {
+    color: #f9e2af;  /* Yellow for warning */
+}
+
+#battery.critical {
+    color: #f38ba8;  /* Red for critical */
+    animation: blink 1s linear infinite;
+}
+```
+
+## Customizing Terminal (Kitty)
+
+### Font and Size
+
+Edit `~/.config/kitty/kitty.conf`:
+
+```bash
+# Font configuration
+font_family      JetBrains Mono Nerd Font
+bold_font        auto
+italic_font      auto
+bold_italic_font auto
+font_size        12.0
+
+# Font features
+disable_ligatures never  # Enable programming ligatures
+```
+
+### Opacity and Blur
+
+```bash
+# Transparency
+background_opacity 0.9
+
+# Blur (requires compositor support)
+background_blur 1
+```
+
+### Custom Key Mappings
+
+```bash
+# Add custom keybindings
+map ctrl+shift+t new_tab
+map ctrl+shift+w close_tab
+map ctrl+shift+right next_tab
+map ctrl+shift+left previous_tab
+```
+
+## Customizing Rofi Menus
+
+### Changing Rofi Theme
+
+Rofi styles are located in `~/.config/rofi/styles/`. The color palette is controlled by:
+
+```css
+/* ~/.config/rofi/styles/_core/palette.rasi */
+
+* {
+    font:                  "JetBrains Mono Nerd Font 14";
+    background:            #1e1e2e;
+    background-alt:        #45475a;
+    foreground:            #cdd6f4;
+    selected:              #89b4fa;
+    active:                #89b4fa;
+    urgent:                #89b4fa;
+}
+```
+
+<Tip>
+The palette file is automatically generated when you switch themes, but you can manually edit it for custom colors that persist until the next theme change.
+</Tip>
+
+### Custom Rofi Scripts
+
+Create custom Rofi menus in `~/.config/rofi/scripts/`:
+
+```bash
+#!/usr/bin/env bash
+# ~/.config/rofi/scripts/my-custom-menu.sh
+
+set -euo pipefail
+
+OPTIONS="Option 1\nOption 2\nOption 3"
+CHOICE=$(echo -e "$OPTIONS" | rofi -dmenu -p "Select:")
+
+case "$CHOICE" in
+    "Option 1")
+        # Your command here
+        notify-send "Selected Option 1"
+        ;;
+    "Option 2")
+        notify-send "Selected Option 2"
+        ;;
+    "Option 3")
+        notify-send "Selected Option 3"
+        ;;
+esac
+```
+
+Make it executable and bind to a key:
+
+```bash
+chmod +x ~/.config/rofi/scripts/my-custom-menu.sh
+
+# Add to ~/.config/sway/config
+bindsym $mod+M exec ~/.config/rofi/scripts/my-custom-menu.sh
+```
+
+## Customizing Autostart Applications
+
+### Editing Autostart Script
+
+Edit `~/.config/scripts/autostart.sh` to control which applications launch on startup:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+sleep 2
+
+# Disable default apps by commenting out:
+# swaymsg 'workspace number 1; exec firefox' >/dev/null 2>&1 || true
+# swaymsg 'workspace number 2; exec code' >/dev/null 2>&1 || true
+# swaymsg 'workspace number 3; exec kitty' >/dev/null 2>&1 || true
+
+# Add your own autostart apps:
+swaymsg 'workspace number 1; exec brave' >/dev/null 2>&1 || true
+sleep 1
+swaymsg 'workspace number 2; exec thunderbird' >/dev/null 2>&1 || true
+sleep 1
+swaymsg 'workspace number 3; exec spotify' >/dev/null 2>&1 || true
+```
+
+### Adding Services to Sway Config
+
+Edit `~/.config/sway/config` to add services that should start immediately:
+
+```bash
+# Add after line 160
+exec blueman-applet              # Bluetooth tray icon
+exec wl-paste --watch cliphist   # Clipboard manager
+exec gammastep                   # Screen color temperature
+exec_always autotiling           # Automatic tiling layout
+```
+
+<Tip>
+Use `exec` for commands that should run once on startup. Use `exec_always` for commands that should run on every config reload.
+</Tip>
+
+## Input Device Customization
+
+### Keyboard Layout
+
+Edit keyboard settings in `~/.config/sway/config:140-143`:
+
+```bash
+input type:keyboard {
+    xkb_layout us,de,fr          # Multiple layouts
+    xkb_variant ,nodeadkeys,     # Layout variants
+    xkb_options grp:alt_shift_toggle,caps:escape  # Options
+    repeat_delay 300             # Key repeat delay (ms)
+    repeat_rate 50               # Key repeat rate (chars/sec)
+}
+```
+
+### Touchpad Customization
+
+```bash
+input type:touchpad {
+    tap enabled                  # Tap to click
+    natural_scroll enabled       # Natural scrolling
+    dwt enabled                  # Disable while typing
+    accel_profile adaptive       # Pointer acceleration
+    pointer_accel 0.3            # Acceleration factor (-1 to 1)
+    scroll_factor 1.0            # Scroll sensitivity
+    middle_emulation enabled     # Emulate middle click
+}
+```
+
+### Mouse Customization
+
+```bash
+input type:pointer {
+    accel_profile flat           # Disable acceleration (gaming)
+    pointer_accel 0              # No acceleration
+    scroll_factor 2.0            # Faster scrolling
+}
+```
+
+<Tip>
+Find specific input device names with `swaymsg -t get_inputs` and configure them individually using `input "device-name" { ... }`
+</Tip>
+
+## Monitor Configuration
+
+### Display Output Settings
+
+Add output configuration to `~/.config/sway/config`:
+
+```bash
+# Single monitor with custom resolution and refresh rate
+output DP-1 resolution 2560x1440@144Hz position 0,0
+
+# Dual monitor setup
+output DP-1 resolution 2560x1440 position 0,0
+output HDMI-A-1 resolution 1920x1080 position 2560,0
+
+# Laptop with external monitor
+output eDP-1 resolution 1920x1080 position 0,0
+output HDMI-A-1 resolution 1920x1080 position 1920,0
+
+# Disable laptop screen when lid closed
+bindswitch --reload --locked lid:on output eDP-1 disable
+bindswitch --reload --locked lid:off output eDP-1 enable
+```
+
+Find output names:
+
+```bash
+swaymsg -t get_outputs
+```
+
+### Workspace to Output Binding
+
+Assign specific workspaces to specific monitors:
+
+```bash
+# Workspaces 1-5 on left monitor
+workspace 1 output DP-1
+workspace 2 output DP-1
+workspace 3 output DP-1
+
+# Workspaces 6-10 on right monitor
+workspace 6 output HDMI-A-1
+workspace 7 output HDMI-A-1
+workspace 8 output HDMI-A-1
+```
+
+## Window Rules
+
+### Floating Windows
+
+Make specific applications float by default:
+
+```bash
+# Add to ~/.config/sway/config
+for_window [app_id="pavucontrol"] floating enable
+for_window [app_id="thunar"] floating enable
+for_window [title="Picture-in-Picture"] floating enable
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="dialog"] floating enable
+```
+
+### Window Size and Position
+
+```bash
+# Set specific size and position
+for_window [app_id="pavucontrol"] floating enable, resize set 800 600, move position center
+for_window [title="Calculator"] floating enable, resize set 400 500
+```
+
+### Workspace Assignment
+
+Assign applications to specific workspaces:
+
+```bash
+# Browsers to workspace 1
+assign [app_id="firefox"] workspace 1
+assign [app_id="brave"] workspace 1
+
+# Code editors to workspace 2
+assign [app_id="code"] workspace 2
+assign [app_id="nvim"] workspace 2
+
+# Communication apps to workspace 4
+assign [app_id="discord"] workspace 4
+assign [app_id="telegram"] workspace 4
+```
+
+<Tip>
+Find application `app_id` values by running: `swaymsg -t get_tree | grep app_id`
+</Tip>
+
+## Notification Customization (Mako)
+
+Edit `~/.config/mako/config` to customize notifications:
+
+```ini
+# Position and size
+anchor=top-right
+width=350
+height=150
+margin=10
+padding=15
+
+# Appearance
+border-size=2
+border-radius=8
+font=JetBrains Mono Nerd Font 12
+
+# Colors
+background-color=#1e1e2e
+text-color=#cdd6f4
+border-color=#89b4fa
+
+# Behavior
+default-timeout=5000
+ignore-timeout=0
+max-visible=5
+layer=overlay
+
+# Urgency levels
+[urgency=low]
+border-color=#45475a
+default-timeout=3000
+
+[urgency=high]
+border-color=#f38ba8
+default-timeout=0
+```
+
+Reload Mako after changes:
+
+```bash
+makoctl reload
+```
+
+## Creating Configuration Backups
+
+Before making significant changes, create backups:
+
+```bash
+# Backup entire .config
+cp -r ~/.config ~/.config.backup-$(date +%Y%m%d)
+
+# Backup specific configurations
+cp ~/.config/sway/config ~/.config/sway/config.bak
+cp ~/.config/waybar/config-sway.jsonc ~/.config/waybar/config-sway.jsonc.bak
+```
+
+<Warning>
+The `update.sh` script creates automatic backups before applying changes, but manual backups before experiments are recommended.
+</Warning>
+
+## Testing Configuration Changes
+
+After making changes:
+
+1. **Check syntax** (for Sway config):
+   ```bash
+   sway -C ~/.config/sway/config
+   ```
+
+2. **Reload configuration**:
+   ```bash
+   # Sway
+   swaymsg reload
+   # or press Super+Shift+R
+   
+   # Waybar
+   killall waybar && waybar -c ~/.config/waybar/config-sway.jsonc &
+   
+   # Mako
+   makoctl reload
+   ```
+
+3. **Check for errors**:
+   ```bash
+   # Sway logs
+   journalctl --user -u sway -n 50
+   
+   # Or from TTY
+   sway -d 2> ~/sway.log
+   ```
+
+<Tip>
+Test configuration changes in a nested Sway session first: `sway -c ~/.config/sway/config` from within your current Sway session.
+</Tip>

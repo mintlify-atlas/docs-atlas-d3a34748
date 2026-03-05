@@ -1,0 +1,410 @@
+---
+title: wallpaper-switcher.sh
+description: Change wallpaper using Rofi with thumbnail previews
+---
+
+## Overview
+
+The `wallpaper-switcher.sh` script provides a quick way to change your wallpaper without modifying other theme settings. It displays a Rofi menu with thumbnail previews of all wallpapers in your wallpapers directory and applies the selected wallpaper using `swaybg`.
+
+<Info>
+This script only changes the wallpaper, not colors or other theme elements. Use [`theme-switcher.sh`](/reference/theme-switcher) for comprehensive theme changes.
+</Info>
+
+## Location
+
+```bash
+~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+## Usage
+
+```bash
+~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+Launches an interactive Rofi menu showing all wallpapers with thumbnail previews.
+
+## What It Does
+
+### Step-by-Step Execution
+
+1. **Dependency Check**
+   - Verifies `rofi` is installed
+   - Exits with error if rofi is missing
+
+2. **Wallpapers Directory Check**
+   - Checks if `~/.config/wallpapers` exists
+   - Sends notification and exits gracefully if directory is missing
+
+3. **Wallpaper Discovery**
+   - Scans `~/.config/wallpapers/` for all image files
+   - Supports any image format (jpg, png, webp, etc.)
+   - Creates temporary file with wallpaper list and thumbnail paths
+
+4. **Interactive Selection**
+   - Displays Rofi menu with:
+     - Wallpaper filenames
+     - Thumbnail previews using `-show-icons`
+     - Custom theme: `~/.config/rofi/styles/_core/wallpaper-switcher.rasi`
+   - Handles Rofi errors gracefully
+
+5. **Wallpaper Application**
+   - Validates selected wallpaper file exists
+   - Saves wallpaper path to `~/.config/sway/wallpaper`
+   - Kills existing `swaybg` process
+   - Launches new `swaybg` with selected wallpaper in fill mode
+   - Sends success notification with wallpaper thumbnail
+
+## Configuration
+
+### Wallpapers Directory
+
+<ParamField path="FONDOS_DIR" type="string" default="~/.config/wallpapers">
+  Directory containing wallpaper images. All image files in this directory will be available for selection.
+</ParamField>
+
+### Rofi Theme
+
+<ParamField path="THEME_PATH" type="string" default="~/.config/rofi/styles/_core/wallpaper-switcher.rasi">
+  Rofi theme file used for the wallpaper selection menu.
+</ParamField>
+
+### Wallpaper State File
+
+<ParamField path="SWAY_WALL_FILE" type="string" default="~/.config/sway/wallpaper">
+  File storing the path to the currently active wallpaper. Read by Sway on startup.
+</ParamField>
+
+## Wallpaper Storage
+
+### Directory Structure
+
+```
+~/.config/wallpapers/
+├── landscape-1.jpg
+├── abstract-blue.png
+├── nature-forest.webp
+├── minimal-dark.jpg
+└── ...
+```
+
+All files in this directory are treated as potential wallpapers. The script uses bash's `nullglob` option, so non-existent patterns are safely ignored.
+
+### Adding Wallpapers
+
+```bash
+# Create wallpapers directory if it doesn't exist
+mkdir -p ~/.config/wallpapers
+
+# Copy wallpapers
+cp ~/Pictures/*.jpg ~/.config/wallpapers/
+cp ~/Downloads/wallpaper.png ~/.config/wallpapers/
+
+# Download wallpapers
+wget -P ~/.config/wallpapers https://example.com/wallpaper.jpg
+```
+
+## Notifications
+
+The script uses `notify-send` for user feedback:
+
+### Success
+```
+Title: Wallpaper (Sway)
+Message: Cambiado a: wallpaper-name.jpg
+Icon: [thumbnail of selected wallpaper]
+```
+
+### Errors
+
+#### Directory Not Found
+```
+Title: Wallpaper
+Message: No existe: ~/.config/wallpapers
+```
+
+#### No Images Found
+```
+Title: Wallpaper
+Message: No se encontraron imágenes en ~/.config/wallpapers
+```
+
+#### File Not Found
+```
+Title: Wallpaper
+Message: Archivo no encontrado: /path/to/wallpaper.jpg
+```
+
+#### Rofi Error
+```
+Title: Wallpaper
+Message: Rofi error: [error message]
+```
+
+## Error Handling
+
+### rofi Not Installed
+```bash
+Error: rofi no está instalado
+```
+Install rofi: `sudo pacman -S rofi`
+
+### Wallpapers Directory Missing
+Sends notification and exits gracefully (no error code).
+
+### No Wallpapers Found
+Sends notification and exits gracefully (no error code).
+
+### Selected File Not Found
+```bash
+Archivo no encontrado: /path/to/wallpaper.jpg
+```
+Sends notification and exits with code 1.
+
+### Rofi Execution Error
+Captures stderr and displays truncated error message (max 220 characters) in notification.
+
+## Exit Codes
+
+- **0**: Success (wallpaper changed) or cancelled by user (Esc pressed)
+- **1**: Error (rofi not installed or selected file not found)
+
+## Examples
+
+### Standard Usage
+
+```bash
+~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+Displays Rofi menu with all wallpapers and thumbnail previews.
+
+### Keybinding in Sway
+
+Add to `~/.config/sway/config`:
+
+```bash
+# Wallpaper switcher
+bindsym $mod+w exec ~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+### Waybar Integration
+
+Example Waybar custom module:
+
+```json
+"custom/wallpaper": {
+    "format": " ",
+    "on-click": "~/.config/rofi/scripts/wallpaper-switcher.sh",
+    "tooltip": false
+}
+```
+
+### Load Wallpaper on Startup
+
+Add to `~/.config/sway/config`:
+
+```bash
+# Load saved wallpaper
+exec swaybg -i $(cat ~/.config/sway/wallpaper) -m fill
+```
+
+Or use the autostart script:
+
+```bash
+exec ~/.config/scripts/autostart.sh
+```
+
+### Organize Wallpapers by Category
+
+```bash
+# Create subdirectories
+mkdir -p ~/.config/wallpapers/{landscapes,abstract,minimal,anime}
+
+# Move wallpapers
+mv ~/.config/wallpapers/landscape*.jpg ~/.config/wallpapers/landscapes/
+mv ~/.config/wallpapers/abstract*.png ~/.config/wallpapers/abstract/
+```
+
+<Warning>
+The script only scans the top level of `~/.config/wallpapers/`. Subdirectories are not searched.
+</Warning>
+
+### Batch Download Wallpapers
+
+```bash
+#!/bin/bash
+# download-wallpapers.sh
+
+WALL_DIR="$HOME/.config/wallpapers"
+mkdir -p "$WALL_DIR"
+
+# Array of wallpaper URLs
+URLS=(
+  "https://example.com/wallpaper1.jpg"
+  "https://example.com/wallpaper2.png"
+  "https://example.com/wallpaper3.webp"
+)
+
+for url in "${URLS[@]}"; do
+  wget -P "$WALL_DIR" "$url"
+done
+
+notify-send "Wallpapers" "Downloaded ${#URLS[@]} wallpapers"
+```
+
+## swaybg Options
+
+The script uses `swaybg -m fill` by default. You can modify the script to use different scaling modes:
+
+### Available Modes
+
+- `stretch` - Stretch to fill, ignoring aspect ratio
+- `fill` - Preserve aspect ratio, crop to fill (default)
+- `fit` - Preserve aspect ratio, letterbox if needed
+- `center` - Center image without scaling
+- `tile` - Tile the image
+- `solid_color` - Use solid color (requires color instead of image)
+
+### Custom Scaling
+
+Modify line 57 in the script:
+
+```bash
+# Original
+swaybg -i "$WALL" -m fill >/dev/null 2>&1 & disown || true
+
+# Use fit mode instead
+swaybg -i "$WALL" -m fit >/dev/null 2>&1 & disown || true
+```
+
+## Current Wallpaper Tracking
+
+The current wallpaper path is saved to:
+```
+~/.config/sway/wallpaper
+```
+
+Example contents:
+```
+/home/user/.config/wallpapers/landscape-sunset.jpg
+```
+
+This file is read by:
+- Sway configuration on startup
+- Other scripts that need to know the current wallpaper
+- Theme switcher when applying themes
+
+## Rofi Configuration
+
+The script uses a custom Rofi theme located at:
+```
+~/.config/rofi/styles/_core/wallpaper-switcher.rasi
+```
+
+This theme controls:
+- Window size and position
+- Icon size for thumbnails
+- Colors and fonts
+- Layout and spacing
+
+Example customization:
+
+```css
+/* ~/.config/rofi/styles/_core/wallpaper-switcher.rasi */
+
+window {
+    width: 800px;
+    height: 600px;
+}
+
+element-icon {
+    size: 128px;  /* Thumbnail size */
+}
+```
+
+## Temporary Files
+
+The script creates temporary files for Rofi input:
+
+```bash
+OPTIONS_FILE="$(mktemp)"  # Wallpaper list with icons
+ROFI_ERR="$(mktemp)"       # Rofi error output
+```
+
+These are automatically cleaned up on exit using a trap:
+
+```bash
+trap 'rm -f "$OPTIONS_FILE" "$ROFI_ERR"' EXIT
+```
+
+## Performance Considerations
+
+- **Large wallpaper collections**: Rofi may take a moment to load thumbnails for 100+ images
+- **High-resolution images**: Thumbnails are generated on-the-fly by Rofi
+- **Network storage**: Accessing wallpapers over network shares may be slower
+
+## Related Scripts
+
+- [`theme-switcher.sh`](/reference/theme-switcher) - Complete theme switching (includes wallpaper)
+- `setwallpaper.sh` - Set wallpaper from command line or scripts
+- `autostart.sh` - Restore wallpaper on Sway startup
+
+## Dependencies
+
+### Required
+- `rofi` - Application launcher with icon support
+- `swaybg` - Wallpaper utility for Wayland
+
+### Optional
+- `notify-send` (libnotify) - Desktop notifications
+
+## Troubleshooting
+
+### Thumbnails Not Showing
+
+Ensure Rofi is compiled with icon support:
+```bash
+rofi -version | grep -i icon
+```
+
+If not, reinstall rofi with icon support enabled.
+
+### Wallpaper Not Changing
+
+Check if swaybg is running:
+```bash
+pgrep swaybg
+```
+
+Manually test swaybg:
+```bash
+killall swaybg
+swaybg -i ~/.config/wallpapers/test.jpg -m fill
+```
+
+### Permission Errors
+
+Ensure the script is executable:
+```bash
+chmod +x ~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+### Rofi Theme Missing
+
+If the Rofi theme file is missing, Rofi will use the default theme:
+```bash
+# Check if theme exists
+ls -l ~/.config/rofi/styles/_core/wallpaper-switcher.rasi
+
+# If missing, run update.sh to restore
+cd ~/Config-Sway
+./update.sh
+```
+
+## Source Code
+
+View the full source: `.config/rofi/scripts/wallpaper-switcher.sh` (63 lines)
+
+Author: Fravelz

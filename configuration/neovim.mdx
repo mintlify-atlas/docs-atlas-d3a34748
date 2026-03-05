@@ -1,0 +1,606 @@
+---
+title: 'Neovim Configuration'
+description: 'Modern Neovim setup with NvChad, LSP, and custom keybindings'
+icon: 'code'
+---
+
+# Neovim Configuration
+
+Config-Sway includes a modern Neovim setup based on **NvChad v2.5**, providing a powerful IDE-like experience with LSP support, syntax highlighting, and efficient keybindings.
+
+## Configuration Structure
+
+```
+~/.config/nvim/
+├── init.lua                 # Main entry point
+├── lua/
+│   ├── autocmds.lua         # Auto-commands
+│   ├── chadrc.lua           # NvChad configuration
+│   ├── mappings.lua         # Custom keybindings
+│   ├── options.lua          # Editor options
+│   ├── configs/
+│   │   ├── conform.lua      # Code formatting
+│   │   ├── lazy.lua         # Plugin manager config
+│   │   └── lspconfig.lua    # LSP setup
+│   └── plugins/
+│       └── init.lua         # Plugin definitions
+```
+
+## NvChad Framework
+
+### What is NvChad?
+
+NvChad is a Neovim configuration framework that provides:
+- Pre-configured LSP (Language Server Protocol)
+- Modern UI with custom statusline
+- File explorer (NvimTree)
+- Fuzzy finder (Telescope)
+- Git integration
+- Syntax highlighting (Treesitter)
+
+### Initialization
+
+```lua ~/.config/nvim/init.lua
+vim.g.base46_cache = vim.fn.stdpath "data" .. "/base46/"
+vim.g.mapleader = " "
+
+-- Bootstrap lazy.nvim plugin manager
+local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
+
+if not vim.uv.fs_stat(lazypath) then
+  local repo = "https://github.com/folke/lazy.nvim.git"
+  vim.fn.system { "git", "clone", "--filter=blob:none", repo, "--branch=stable", lazypath }
+end
+
+vim.opt.rtp:prepend(lazypath)
+```
+
+**Leader key:** Set to `Space`
+
+### Plugin Management
+
+```lua
+require("lazy").setup({
+  { "nvzone/volt" , lazy = true },
+  { "nvzone/menu" , lazy = true },
+  {
+    "NvChad/NvChad",
+    lazy = false,
+    branch = "v2.5",
+    import = "nvchad.plugins",
+  },
+  { import = "plugins" },
+}, lazy_config)
+```
+
+- **Lazy loading** improves startup time
+- **NvChad v2.5** provides base functionality
+- Custom plugins loaded from `lua/plugins/`
+
+## Core Configuration
+
+### Editor Options
+
+```lua ~/.config/nvim/init.lua
+vim.opt.number = true
+vim.opt.relativenumber = true
+```
+
+- **Line numbers:** Absolute line numbers displayed
+- **Relative numbers:** Distance from current line (useful for motions like `5j`)
+
+<Tip>
+With relative numbers, you can quickly jump 7 lines down with `7j` or delete 3 lines up with `d3k`.
+</Tip>
+
+### Additional Options
+
+```lua ~/.config/nvim/lua/options.lua
+require "nvchad.options"
+
+-- Add custom options here
+-- local o = vim.o
+-- o.cursorlineopt = 'both'  -- Enable cursorline
+```
+
+This file extends NvChad's default options. Uncomment lines to enable features.
+
+## Keybindings
+
+<Accordion title="Exit Mode Bindings (ZX)">
+
+### Universal Exit: `zx`
+
+```lua ~/.config/nvim/init.lua
+vim.keymap.set('i', 'zx', '<Esc>', { noremap = true, desc = "Salir del modo inserción" })
+vim.keymap.set('v', 'zx', '<Esc>', { noremap = true, desc = "Salir del modo visual" })
+vim.keymap.set('c', 'zx', '<C-c>', { noremap = true, desc = "Cancelar comando" })
+vim.keymap.set('t', 'zx', '<C-\\><C-n>', { noremap = true, desc = "Salir del modo terminal" })
+```
+
+**Usage:** Press `zx` in any mode to return to Normal mode.
+
+| Mode | `zx` Effect |
+|------|-------------|
+| Insert | Exit to Normal mode |
+| Visual | Exit to Normal mode |
+| Command | Cancel command |
+| Terminal | Exit to Normal mode |
+
+<Tip>
+This creates a consistent escape mechanism across all modes, as an alternative to `Esc` or `Ctrl+C`.
+</Tip>
+
+</Accordion>
+
+<Accordion title="Window Navigation">
+
+### Split Navigation
+
+```lua ~/.config/nvim/init.lua
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = "Mover al panel izquierdo" })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = "Mover al panel derecho" })
+```
+
+- **`Ctrl + H`** - Move to left split
+- **`Ctrl + L`** - Move to right split
+
+<Note>
+NvChad provides `Ctrl+J` and `Ctrl+K` for vertical navigation by default.
+</Note>
+
+</Accordion>
+
+<Accordion title="NvChad Default Keybindings">
+
+```lua ~/.config/nvim/lua/mappings.lua
+require "nvchad.mappings"
+
+local map = vim.keymap.set
+
+map("n", ";", ":", { desc = "CMD enter command mode" })
+map("i", "jk", "<ESC>")
+```
+
+### Custom Additions
+
+- **`;` in Normal mode** - Enter command mode (alternative to `:`)
+- **`jk` in Insert mode** - Quick exit to Normal mode
+
+### Common NvChad Mappings
+
+| Key | Mode | Action |
+|-----|------|--------|
+| `Space + e` | Normal | Toggle NvimTree file explorer |
+| `Space + ff` | Normal | Find files (Telescope) |
+| `Space + fw` | Normal | Find word in files (live grep) |
+| `Space + fb` | Normal | Find buffers |
+| `Space + fh` | Normal | Find help tags |
+| `Space + th` | Normal | Change theme |
+| `Space + ch` | Normal | NvChad cheatsheet |
+| `Ctrl + n` | Normal | Toggle file explorer |
+| `Tab` | Normal | Next buffer |
+| `Shift + Tab` | Normal | Previous buffer |
+| `Space + x` | Normal | Close buffer |
+
+</Accordion>
+
+<Accordion title="Menu Integration">
+
+### Context Menus
+
+```lua ~/.config/nvim/init.lua
+vim.keymap.set("n", "<C-t>", function()
+  require("menu").open("default")
+end, {})
+
+vim.keymap.set({ "n", "v" }, "<RightMouse>", function()
+  require('menu.utils').delete_old_menus()
+  vim.cmd.exec '"normal! \\<RightMouse>"'
+  
+  local buf = vim.api.nvim_win_get_buf(vim.fn.getmousepos().winid)
+  local options = vim.bo[buf].ft == "NvimTree" and "nvimtree" or "default"
+  
+  require("menu").open(options, { mouse = true })
+end, {})
+```
+
+- **`Ctrl + T`** - Open default context menu
+- **Right Click** - Context-sensitive menu (NvimTree vs. editor)
+
+</Accordion>
+
+## LSP Configuration
+
+### Language Server Setup
+
+```lua ~/.config/nvim/lua/configs/lspconfig.lua
+-- Configure language servers here
+-- Example: lua_ls, pyright, tsserver, etc.
+```
+
+NvChad automatically configures common language servers. Install them with Mason:
+
+**Open Mason:** `:Mason`
+
+**Install servers:**
+```
+:MasonInstall lua-language-server
+:MasonInstall pyright
+:MasonInstall typescript-language-server
+```
+
+### LSP Keybindings
+
+Once LSP is active in a buffer:
+
+| Key | Action |
+|-----|--------|
+| `gd` | Go to definition |
+| `gr` | Go to references |
+| `K` | Hover documentation |
+| `Space + ca` | Code actions |
+| `Space + rn` | Rename symbol |
+| `[d` | Previous diagnostic |
+| `]d` | Next diagnostic |
+| `Space + q` | Show diagnostics list |
+
+## Code Formatting
+
+### Conform.nvim
+
+```lua ~/.config/nvim/lua/configs/conform.lua
+-- Configure formatters here
+-- Example: prettier, black, stylua, etc.
+```
+
+Format on save or manually:
+
+**Manual format:** `Space + fm`
+
+**Auto-format on save:**
+```lua
+autocmd BufWritePre * lua vim.lsp.buf.format()
+```
+
+## File Explorer (NvimTree)
+
+### Opening NvimTree
+
+- **`Ctrl + N`** - Toggle file explorer
+- **`Space + e`** - Focus file explorer
+
+### NvimTree Navigation
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Open file or folder |
+| `o` | Open file |
+| `a` | Create new file/folder |
+| `d` | Delete file/folder |
+| `r` | Rename |
+| `x` | Cut |
+| `c` | Copy |
+| `p` | Paste |
+| `R` | Refresh |
+| `H` | Toggle hidden files |
+| `?` | Show help |
+
+## Fuzzy Finding (Telescope)
+
+### Search Commands
+
+```vim
+:Telescope find_files     " Find files by name
+:Telescope live_grep      " Search text in files
+:Telescope buffers        " List open buffers
+:Telescope help_tags      " Search help documentation
+:Telescope oldfiles       " Recently opened files
+:Telescope git_status     " Git changed files
+```
+
+### Quick Keybindings
+
+- **`Space + ff`** - Find files
+- **`Space + fw`** - Find word (live grep)
+- **`Space + fb`** - Find buffers
+- **`Space + fh`** - Find help
+- **`Space + fo`** - Find old files
+- **`Space + fz`** - Find in current buffer
+
+### Telescope Navigation
+
+| Key | Action |
+|-----|--------|
+| `Ctrl + J/K` | Move up/down in results |
+| `Ctrl + U/D` | Scroll preview up/down |
+| `Enter` | Open file |
+| `Ctrl + X` | Open in horizontal split |
+| `Ctrl + V` | Open in vertical split |
+| `Ctrl + T` | Open in new tab |
+| `Esc` | Close Telescope |
+
+## Syntax Highlighting (Treesitter)
+
+NvChad includes Treesitter for advanced syntax highlighting and code understanding.
+
+### Installing Parsers
+
+```vim
+:TSInstall lua
+:TSInstall python
+:TSInstall javascript
+:TSInstall bash
+```
+
+**Install all maintained parsers:**
+```vim
+:TSInstall all
+```
+
+### Treesitter Features
+
+- **Syntax highlighting** - Context-aware colors
+- **Code folding** - Fold functions, classes, blocks
+- **Incremental selection** - Expand selection based on syntax tree
+- **Indentation** - Smart auto-indent
+
+## Customization
+
+<Accordion title="Adding Custom Plugins">
+
+Edit `~/.config/nvim/lua/plugins/init.lua`:
+
+```lua
+return {
+  -- Example: Add GitHub Copilot
+  {
+    "github/copilot.vim",
+    lazy = false,
+  },
+  
+  -- Example: Add better commenting
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      require("Comment").setup()
+    end,
+  },
+}
+```
+
+Restart Neovim to install new plugins.
+
+</Accordion>
+
+<Accordion title="Changing Theme">
+
+NvChad includes multiple themes:
+
+**List themes:**
+```vim
+:Telescope themes
+```
+
+Or use keybinding: `Space + th`
+
+**Set default theme:**
+
+Edit `~/.config/nvim/lua/chadrc.lua`:
+
+```lua
+local M = {}
+
+M.ui = {
+  theme = "catppuccin",  -- or "onedark", "gruvbox", etc.
+}
+
+return M
+```
+
+</Accordion>
+
+<Accordion title="Custom Auto-commands">
+
+Edit `~/.config/nvim/lua/autocmds.lua`:
+
+```lua
+-- Auto-save on focus lost
+vim.api.nvim_create_autocmd("FocusLost", {
+  pattern = "*",
+  command = "silent! wa",
+})
+
+-- Highlight yanked text
+vim.api.nvim_create_autocmd("TextYankPost", {
+  pattern = "*",
+  callback = function()
+    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
+  end,
+})
+
+-- Remove trailing whitespace on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  command = "%s/\\s\\+$//e",
+})
+```
+
+</Accordion>
+
+## Useful Commands
+
+### NvChad Commands
+
+```vim
+:NvChadUpdate       " Update NvChad
+:NvChadSnapshotCreate " Create config snapshot
+:NvChadSnapshotDelete " Delete snapshot
+:NvChadSnapshotRestore " Restore from snapshot
+```
+
+### Plugin Management
+
+```vim
+:Lazy               " Open plugin manager
+:Lazy sync          " Install/update/clean plugins
+:Lazy clean         " Remove unused plugins
+:Lazy update        " Update all plugins
+```
+
+### Mason (LSP/Tools)
+
+```vim
+:Mason              " Open Mason UI
+:MasonInstall <name> " Install tool
+:MasonUninstall <name> " Remove tool
+:MasonUpdate        " Update all tools
+```
+
+## Troubleshooting
+
+<Accordion title="Neovim slow to start">
+
+**Profile startup time:**
+```bash
+nvim --startuptime startup.log
+```
+
+**Optimize plugin loading:**
+- Ensure plugins are set to `lazy = true` where possible
+- Use `event`, `ft`, or `cmd` triggers for lazy loading
+
+Example:
+```lua
+{
+  "plugin-name",
+  lazy = true,
+  event = "BufRead",  -- Load when reading a buffer
+}
+```
+
+</Accordion>
+
+<Accordion title="LSP not working">
+
+**Check if LSP is attached:**
+```vim
+:LspInfo
+```
+
+**Install language server:**
+```vim
+:Mason
+```
+
+**Restart LSP:**
+```vim
+:LspRestart
+```
+
+**Check logs:**
+```vim
+:LspLog
+```
+
+</Accordion>
+
+<Accordion title="Treesitter highlighting broken">
+
+**Update parsers:**
+```vim
+:TSUpdate
+```
+
+**Reinstall specific parser:**
+```vim
+:TSInstall! python
+```
+
+**Check health:**
+```vim
+:checkhealth nvim-treesitter
+```
+
+</Accordion>
+
+<Accordion title="Plugins not loading">
+
+**Sync plugins:**
+```vim
+:Lazy sync
+```
+
+**Clear cache:**
+```bash
+rm -rf ~/.local/share/nvim
+rm -rf ~/.cache/nvim
+```
+
+Then restart Neovim.
+
+</Accordion>
+
+## Neovim Tips
+
+<Accordion title="Learning Vim motions">
+
+**Built-in tutor:**
+```bash
+nvim +Tutor
+```
+
+**Practice with:**
+- `vimtutor` - Interactive tutorial
+- [Vim Adventures](https://vim-adventures.com/) - Game-based learning
+- [OpenVim](https://www.openvim.com/) - Interactive tutorial
+
+</Accordion>
+
+<Accordion title="Useful motions">
+
+- `ciw` - Change inner word
+- `di"` - Delete inside quotes
+- `va{` - Select around curly braces
+- `gg=G` - Auto-indent entire file
+- `:%s/old/new/g` - Replace all occurrences
+- `.` - Repeat last change
+- `*` - Search for word under cursor
+- `<C-o>` - Jump to previous location
+- `<C-i>` - Jump to next location
+
+</Accordion>
+
+<Accordion title="Macro recording">
+
+1. Press `q` + letter (e.g., `qa` for register 'a')
+2. Perform actions
+3. Press `q` to stop recording
+4. Play macro with `@a`
+5. Repeat with `@@`
+
+**Example:** Record `qa`, type `:s/foo/bar<CR>`, press `q`, then `@a` to replay.
+
+</Accordion>
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Kitty Terminal" icon="terminal" href="/configuration/kitty">
+    Terminal emulator where Neovim runs
+  </Card>
+  <Card title="Sway Keybindings" icon="keyboard" href="/configuration/sway">
+    Window manager shortcuts
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+- **[NvChad Documentation](https://nvchad.com/)** - Official NvChad docs
+- **[Neovim Documentation](https://neovim.io/doc/)** - Neovim reference
+- **[Lua Guide for Neovim](https://github.com/nanotee/nvim-lua-guide)** - Learn Lua config
+- **[Awesome Neovim](https://github.com/rockerBOO/awesome-neovim)** - Plugin directory
+
+<Tip>
+Press `Space + ch` in Neovim to open the NvChad cheatsheet with all keybindings.
+</Tip>

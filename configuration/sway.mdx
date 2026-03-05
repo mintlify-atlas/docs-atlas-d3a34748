@@ -1,0 +1,384 @@
+---
+title: 'Sway Configuration'
+description: 'Complete guide to the Sway window manager configuration'
+icon: 'window'
+---
+
+# Sway Window Manager Configuration
+
+Config-Sway uses Sway as the primary Wayland compositor and window manager. The configuration provides a comprehensive setup with keybindings, window management, and theme integration.
+
+## Configuration Files
+
+The Sway configuration is split into two main files:
+
+- **`~/.config/sway/config`** - Main configuration file with keybindings and settings
+- **`~/.config/sway/theme.conf`** - Theme-specific colors, borders, and gaps (dynamically updated)
+
+## Core Settings
+
+### Modifier Key
+
+```sway
+set $mod Mod4
+```
+
+The `Super` (Windows) key is used as the primary modifier for all Sway keybindings.
+
+### Vim-style Navigation
+
+```sway
+set $left h
+set $down j
+set $up k
+set $right l
+```
+
+Movement keys follow Vim conventions for consistency across the system.
+
+## Keybindings
+
+<Accordion title="Application Launchers">
+
+| Keybinding | Action | Description |
+|------------|--------|-------------|
+| `Super + Enter` | `kitty` | Launch terminal emulator |
+| `Super + F` | `firefox` | Launch Firefox browser |
+| `Super + Z` | `flameshot gui` | Take screenshot |
+
+```sway ~/.config/sway/config
+bindsym $mod+Return exec kitty
+bindsym $mod+f exec firefox
+bindsym $mod+z exec flameshot gui
+```
+
+</Accordion>
+
+<Accordion title="Window Management">
+
+### Basic Window Operations
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + C` | Kill focused window |
+| `Super + O` | Toggle split layout |
+| `Super + Shift + R` | Reload Sway configuration |
+
+### Focus Movement
+
+```sway ~/.config/sway/config
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+```
+
+### Moving Floating Windows
+
+**Small movements** (50px):
+```sway
+bindsym $mod+Shift+h move left 50px
+bindsym $mod+Shift+j move down 50px
+bindsym $mod+Shift+k move up 50px
+bindsym $mod+Shift+l move right 50px
+```
+
+**Large movements** (150px) - `Super + Alt + HJKL`:
+```sway
+bindsym $mod+Mod1+h move left 150px
+bindsym $mod+Mod1+j move down 150px
+bindsym $mod+Mod1+k move up 150px
+bindsym $mod+Mod1+l move right 150px
+```
+
+### Resizing Windows
+
+**Super + Ctrl + HJKL**:
+```sway
+bindsym $mod+Control+h resize shrink width 50px
+bindsym $mod+Control+l resize grow width 50px
+bindsym $mod+Control+j resize shrink height 50px
+bindsym $mod+Control+k resize grow height 50px
+```
+
+</Accordion>
+
+<Accordion title="Rofi Menus">
+
+All Rofi menus are accessible through Super key combinations:
+
+| Keybinding | Script | Purpose |
+|------------|--------|----------|
+| `Super + D` | `selector-app.sh` | Application launcher |
+| `Super + Q` | `power-menu.sh` | Power management menu |
+| `Super + A` | `theme-switcher.sh` | Theme switcher |
+| `Super + W` | `wallpaper-switcher.sh` | Wallpaper picker |
+| `Super + E` | `menu-iconos.sh` | Icon menu |
+| `Super + Shift + Enter` | `mode-hacker.sh` | Hacker mode toggle |
+
+```sway ~/.config/sway/config
+bindsym $mod+d exec ~/.config/rofi/scripts/selector-app.sh
+bindsym $mod+q exec ~/.config/rofi/scripts/power-menu.sh
+bindsym $mod+a exec ~/.config/rofi/scripts/theme-switcher.sh
+bindsym $mod+w exec ~/.config/rofi/scripts/wallpaper-switcher.sh
+```
+
+</Accordion>
+
+<Accordion title="Workspaces">
+
+### Standard Workspaces (1-10)
+
+**Switch to workspace:**
+```sway
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+# ... up to $mod+0 for workspace 10
+```
+
+**Move container to workspace:**
+```sway
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+# ... up to $mod+Shift+0
+```
+
+### Special "Magic" Workspace
+
+```sway
+bindsym $mod+s workspace magic
+bindsym $mod+Shift+s move container to workspace magic
+```
+
+<Tip>
+Use the magic workspace as a scratchpad for temporary windows or tasks you want to keep separate from your main workflow.
+</Tip>
+
+### Mouse Wheel Navigation
+
+```sway
+bindsym $mod+button4 workspace next
+bindsym $mod+button5 workspace prev
+```
+
+Scroll while holding Super to cycle through workspaces.
+
+</Accordion>
+
+<Accordion title="Mouse Bindings">
+
+| Mouse Button | With Super Key | Action |
+|--------------|----------------|--------|
+| Left Click | `Super + LMB` | Move window |
+| Middle Click | `Super + MMB` | Resize window |
+| Right Click | `Super + RMB` | Toggle floating |
+
+```sway ~/.config/sway/config
+bindsym $mod+button1 move window
+bindsym $mod+button2 resize
+bindsym $mod+button3 floating toggle
+```
+
+</Accordion>
+
+<Accordion title="Multimedia Keys">
+
+### Audio Control (WirePlumber)
+
+```sway
+bindsym XF86AudioRaiseVolume exec wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+
+bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+```
+
+### Brightness Control
+
+```sway
+bindsym XF86MonBrightnessUp exec brightnessctl -e 4 -n 2 set 5%+
+bindsym XF86MonBrightnessDown exec brightnessctl -e 4 -n 2 set 5%-
+```
+
+### Media Playback (Playerctl)
+
+```sway
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPause exec playerctl play-pause
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioPrev exec playerctl previous
+```
+
+</Accordion>
+
+<Accordion title="Notifications (Mako)">
+
+```sway
+bindsym $mod+n exec makoctl dismiss -a
+bindsym $mod+Shift+n exec makoctl mode -a dnd
+```
+
+- **Super + N** - Dismiss all notifications
+- **Super + Shift + N** - Toggle Do Not Disturb mode
+
+</Accordion>
+
+## Input Configuration
+
+### Keyboard Layout
+
+```sway ~/.config/sway/config
+input type:keyboard {
+    xkb_layout us,latam
+    xkb_options grp:alt_shift_toggle
+}
+```
+
+<Note>
+The configuration supports both US and Latin American keyboard layouts. Switch between them using `Alt + Shift`.
+</Note>
+
+### Touchpad
+
+```sway
+input type:touchpad {
+    tap enabled
+    natural_scroll disabled
+}
+```
+
+## Theme System
+
+### Theme File Structure
+
+```sway ~/.config/sway/theme.conf
+set $bg #1e1e2e
+set $fg #cdd6f4
+set $active #89b4fa
+set $inactive #45475a
+
+default_border pixel 2
+default_floating_border pixel 2
+
+gaps inner 5
+gaps outer 10
+
+client.focused          $active   $active   $fg      $active   $active
+client.focused_inactive $inactive $inactive $fg      $inactive $inactive
+client.unfocused        $inactive $inactive $fg      $inactive $inactive
+```
+
+### Color Variables
+
+| Variable | Purpose | Default Value |
+|----------|---------|---------------|
+| `$bg` | Background color | `#1e1e2e` |
+| `$fg` | Foreground/text color | `#cdd6f4` |
+| `$active` | Active window border | `#89b4fa` |
+| `$inactive` | Inactive window border | `#45475a` |
+
+### Window Decoration
+
+- **Border width**: 2px for both regular and floating windows
+- **Inner gaps**: 5px between windows
+- **Outer gaps**: 10px from screen edges
+
+<Tip>
+The `theme.conf` file is automatically updated when you switch themes using `Super + A`. Each theme in `~/.config/themes/` contains its own `sway/theme.conf` file.
+</Tip>
+
+## Wayland Portal Integration
+
+```sway ~/.config/sway/config
+exec_always systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec_always sh -c 'hash dbus-update-activation-environment 2>/dev/null && \
+    dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK'
+```
+
+This ensures proper integration with:
+- Screen capture (xdg-desktop-portal-wlr)
+- Screenshot tools (Flameshot)
+- DBus-based applications
+
+### Flameshot Configuration
+
+```sway
+for_window [app_id="flameshot"] border pixel 0, floating enable, fullscreen disable, move absolute position 0 0
+```
+
+Special window rules ensure Flameshot overlays work correctly in multi-monitor setups.
+
+## Autostart Applications
+
+```sway ~/.config/sway/config
+exec_always ~/.config/scripts/setwallpaper.sh
+exec nm-applet
+exec sh -c 'CFG="$HOME/.config/waybar/config-sway.jsonc"; \
+    [ -f "$CFG" ] || CFG="$HOME/.config/waybar/config.jsonc"; \
+    exec waybar -c "$CFG"'
+exec mako
+exec bash ~/.config/scripts/autostart.sh
+```
+
+### Startup Services
+
+1. **Wallpaper setter** - Applies saved wallpaper on startup
+2. **nm-applet** - NetworkManager system tray icon
+3. **Waybar** - Status bar with Sway-specific config
+4. **Mako** - Notification daemon
+5. **Custom autostart** - User-defined startup applications
+
+## Advanced Configuration
+
+<Accordion title="Edge Borders">
+
+```sway
+hide_edge_borders none
+```
+
+Window borders are shown on all edges. Change to `smart` to hide borders when only one window is visible.
+
+</Accordion>
+
+<Accordion title="Including Theme Configuration">
+
+```sway
+include ~/.config/sway/theme.conf
+```
+
+The main config file includes the theme configuration, which allows dynamic theme switching without editing the main config.
+
+</Accordion>
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Waybar Configuration" icon="chart-bar" href="/configuration/waybar">
+    Configure the status bar appearance and modules
+  </Card>
+  <Card title="Theme System" icon="palette" href="/configuration/themes">
+    Learn how theme switching works across all components
+  </Card>
+  <Card title="Rofi Configuration" icon="window-restore" href="/configuration/rofi">
+    Customize application launchers and menus
+  </Card>
+  <Card title="Kitty Terminal" icon="terminal" href="/configuration/kitty">
+    Terminal emulator configuration and styling
+  </Card>
+</CardGroup>
+
+## Configuration Tips
+
+<Tip>
+**Reload after changes**: Press `Super + Shift + R` to reload Sway configuration without restarting your session.
+</Tip>
+
+<Note>
+**Backup your config**: Before making changes, create a backup:
+```bash
+cp ~/.config/sway/config ~/.config/sway/config.backup
+```
+</Note>
+
+<Warning>
+Be careful when modifying the portal integration settings. Incorrect configuration may break screenshot functionality and other Wayland features.
+</Warning>

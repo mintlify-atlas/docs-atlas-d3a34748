@@ -1,0 +1,364 @@
+---
+title: theme-switcher.sh
+description: Switch between themes using Rofi with live preview
+---
+
+## Overview
+
+The `theme-switcher.sh` script provides an interactive theme switcher for Sway using Rofi. It displays available themes with wallpaper previews and applies comprehensive theme changes including Kitty terminal colors, Waybar styling, Rofi colors, Sway window decorations, and wallpapers.
+
+<Info>
+Themes are stored in `~/.config/themes/` with each theme in its own directory containing configuration files and wallpapers.
+</Info>
+
+## Location
+
+```bash
+~/.config/rofi/scripts/theme-switcher.sh
+```
+
+## Usage
+
+### Interactive Mode
+
+```bash
+~/.config/rofi/scripts/theme-switcher.sh
+```
+
+Launches Rofi with theme previews for selection.
+
+### Direct Application
+
+```bash
+~/.config/rofi/scripts/theme-switcher.sh <theme-name>
+```
+
+<ParamField path="theme-name" type="string">
+  Name of the theme directory in `~/.config/themes/` to apply directly (skips Rofi selection)
+</ParamField>
+
+## What It Does
+
+### Step-by-Step Execution
+
+1. **Theme Discovery**
+   - Scans `~/.config/themes/` for theme directories
+   - Looks for wallpaper previews (`.jpg`, `.png`, `.webp`)
+   - Builds Rofi menu with theme names and preview icons
+
+2. **Theme Selection**
+   - Displays interactive Rofi menu (if no theme specified)
+   - Shows wallpaper preview thumbnails for each theme
+   - Uses custom Rofi theme: `~/.config/rofi/styles/_core/theme-switcher.rasi`
+
+3. **Backup Creation**
+   - Creates timestamped backups of existing configurations
+   - Format: `original.bak-YYYYMMDD-HHMMSS`
+   - Backs up before each component is modified
+
+4. **Kitty Configuration**
+   - Copies theme's `kitty/` directory to `~/.config/kitty`
+   - Applies color scheme and terminal styling
+
+5. **Waybar Configuration**
+   - Copies `colors.css` and `style.css` to `~/.config/waybar`
+   - Converts Hyprland-specific config to Sway format
+   - Generates `config-sway.jsonc` with module replacements:
+     - `hyprland/workspaces` → `sway/workspaces`
+     - `hyprland/window` → `sway/window`
+     - Special workspace toggle → `kitty -e btop`
+
+6. **Sway Window Theme**
+   - Applies `sway/theme.conf` for window decorations
+   - Sets border colors, title bar colors, and fonts
+
+7. **Rofi Color Palette**
+   - Uses theme's `rofi-style/_core/palette.rasi` if available
+   - Otherwise, auto-generates from `sway/theme.conf` variables:
+     - Extracts `$bg`, `$fg`, `$active`, `$inactive` colors
+     - Extracts font configuration
+     - Creates `~/.config/rofi/styles/_core/palette.rasi`
+
+8. **Wallpaper Application**
+   - Finds wallpaper file (`wallpaper.jpg`, `.png`, or `.webp`)
+   - Saves path to `~/.config/sway/wallpaper`
+   - Kills existing `swaybg` process
+   - Launches new `swaybg` with selected wallpaper
+
+9. **Service Reloads**
+   - Restarts Waybar with new configuration
+   - Reloads Sway to apply theme changes
+   - Sends desktop notification on completion
+
+## Theme Structure
+
+Each theme directory should follow this structure:
+
+```
+~/.config/themes/
+└── theme-name/
+    ├── wallpaper.jpg          # Required: Theme wallpaper (jpg/png/webp)
+    ├── kitty/                 # Optional: Kitty terminal theme
+    │   ├── current-theme.conf
+    │   └── ...
+    ├── waybar/                # Optional: Waybar theme
+    │   ├── colors.css
+    │   ├── style.css
+    │   └── config.jsonc
+    ├── sway/                  # Optional: Sway window theme
+    │   └── theme.conf
+    └── rofi-style/            # Optional: Rofi theme
+        └── _core/
+            └── palette.rasi
+```
+
+### Required Files
+
+<ParamField path="wallpaper.jpg|png|webp" type="file" required>
+  Theme wallpaper image. At least one format must be present.
+</ParamField>
+
+### Optional Files
+
+<ParamField path="kitty/" type="directory">
+  Kitty terminal configuration files. Entire directory is copied to `~/.config/kitty`.
+</ParamField>
+
+<ParamField path="waybar/colors.css" type="file">
+  Waybar color definitions (CSS variables).
+</ParamField>
+
+<ParamField path="waybar/style.css" type="file">
+  Waybar styling and layout.
+</ParamField>
+
+<ParamField path="waybar/config.jsonc" type="file">
+  Waybar module configuration. Automatically converted from Hyprland to Sway format.
+</ParamField>
+
+<ParamField path="sway/theme.conf" type="file">
+  Sway window decoration theme with color variables:
+  - `$bg` - Background color
+  - `$fg` - Foreground color
+  - `$active` - Active window color
+  - `$inactive` - Inactive window color
+  - `font` - Font definition
+</ParamField>
+
+<ParamField path="rofi-style/_core/palette.rasi" type="file">
+  Custom Rofi color palette. If not provided, auto-generated from `sway/theme.conf`.
+</ParamField>
+
+## Sway Theme Configuration Format
+
+Example `sway/theme.conf`:
+
+```bash
+# Color variables
+set $bg #1e1e2e
+set $fg #89b3fa
+set $active #89b3fa
+set $inactive #242438
+
+# Font
+font pango:JetBrains Mono Nerd Font 12
+
+# Window borders
+client.focused          $active $active $bg $active $active
+client.focused_inactive $inactive $inactive $fg $inactive $inactive
+client.unfocused        $inactive $inactive $fg $inactive $inactive
+```
+
+## Auto-Generated Rofi Palette
+
+When no custom Rofi palette is provided, the script generates one from Sway theme variables:
+
+```css
+/* Paleta de colores (auto) - Tema: theme-name */
+
+* {
+    font:                  "JetBrains Mono Nerd Font 14";
+    background:            #1e1e2e;
+    background-alt:        #242438;
+    foreground:            #89b3fa;
+    selected:              #89b3fa;
+    active:                #89b3fa;
+    urgent:                #89b3fa;
+}
+```
+
+## Current Theme Tracking
+
+The currently active theme is saved to:
+```
+~/.config/themes/.current
+```
+
+This file contains the theme name and can be read by other scripts.
+
+## Notifications
+
+The script sends desktop notifications using `notify-send`:
+
+### Success
+```
+Title: Theme Switcher (Sway)
+Message: Tema aplicado: theme-name
+```
+
+### Errors
+```
+Title: Theme Switcher (Sway)
+Message: Error description
+Urgency: critical
+```
+
+## Error Handling
+
+### Themes Directory Missing
+```
+Error: No existe: ~/.config/themes
+```
+Create the themes directory and add theme subdirectories.
+
+### Rofi Not Found
+```
+Error: Falta rofi
+```
+Install rofi: `sudo pacman -S rofi`
+
+### No Themes Available
+```
+Error: No hay temas en ~/.config/themes
+```
+Add at least one theme directory.
+
+### Theme Not Found
+```
+Error: Tema no encontrado: theme-name
+```
+The specified theme directory doesn't exist.
+
+### No Wallpaper
+```
+Error: Este tema no tiene wallpaper.* en la raíz: /path/to/theme
+```
+Each theme must have a `wallpaper.jpg`, `wallpaper.png`, or `wallpaper.webp` file.
+
+### Missing swaybg
+```
+Error: Falta swaybg (no se pudo aplicar el wallpaper)
+```
+Install swaybg: `sudo pacman -S swaybg`
+
+## Exit Codes
+
+- **0**: Success (theme applied) or cancelled by user
+- **1**: Error (missing dependencies, theme not found, or no wallpaper)
+
+## Examples
+
+### Interactive Theme Selection
+
+```bash
+~/.config/rofi/scripts/theme-switcher.sh
+```
+
+Displays Rofi menu with all available themes and wallpaper previews.
+
+### Apply Specific Theme
+
+```bash
+~/.config/rofi/scripts/theme-switcher.sh catppuccin-mocha
+```
+
+Directly applies the "catppuccin-mocha" theme without showing Rofi menu.
+
+### Keybinding in Sway
+
+Add to `~/.config/sway/config`:
+
+```bash
+# Theme switcher
+bindsym $mod+Shift+t exec ~/.config/rofi/scripts/theme-switcher.sh
+```
+
+### Create New Theme
+
+```bash
+# Create theme directory
+mkdir -p ~/.config/themes/my-theme
+
+# Add wallpaper
+cp ~/Pictures/wallpaper.jpg ~/.config/themes/my-theme/
+
+# Add Sway theme (optional)
+mkdir ~/.config/themes/my-theme/sway
+cat > ~/.config/themes/my-theme/sway/theme.conf << 'EOF'
+set $bg #1a1b26
+set $fg #c0caf5
+set $active #7aa2f7
+set $inactive #414868
+
+font pango:JetBrains Mono Nerd Font 11
+
+client.focused $active $active $bg $active $active
+client.unfocused $inactive $inactive $fg $inactive $inactive
+EOF
+
+# Apply the theme
+~/.config/rofi/scripts/theme-switcher.sh my-theme
+```
+
+## Backup Management
+
+Backups are created with timestamps. Clean old backups periodically:
+
+```bash
+# List backups
+ls -ld ~/.config/kitty.bak-* ~/.config/waybar.bak-* ~/.config/sway/theme.conf.bak-*
+
+# Remove backups older than 30 days
+find ~ -maxdepth 1 -name '*.bak-*' -mtime +30 -exec rm -rf {} \;
+```
+
+## Integration with Waybar
+
+Example Waybar module for theme switching:
+
+```json
+"custom/theme": {
+    "format": "  {}",
+    "exec": "cat ~/.config/themes/.current 2>/dev/null || echo 'none'",
+    "interval": 3600,
+    "on-click": "~/.config/rofi/scripts/theme-switcher.sh",
+    "tooltip": false
+}
+```
+
+## Related Scripts
+
+- [`wallpaper-switcher.sh`](/reference/wallpaper-switcher) - Change wallpaper without changing theme
+- [`update.sh`](/reference/update-script) - Sync configuration files from repository
+
+## Dependencies
+
+- `rofi` - Application launcher (for theme selection UI)
+- `swaybg` - Wallpaper utility (for applying wallpapers)
+- `swaymsg` - Sway IPC tool (for reloading configuration)
+- `waybar` - Status bar (optional, for bar theming)
+- `notify-send` - Desktop notifications (optional)
+
+## Notes
+
+- Themes are applied system-wide and persist across reboots
+- The script is designed to work with both Hyprland and Sway themes (auto-converts)
+- Backups are created automatically to prevent data loss
+- Rofi theme preview requires icons support (`-show-icons` flag)
+- The script uses `set -euo pipefail` for strict error handling
+
+## Source Code
+
+View the full source: `.config/rofi/scripts/theme-switcher.sh` (186 lines)
+
+Author: Fravelz

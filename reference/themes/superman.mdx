@@ -1,0 +1,165 @@
+---
+title: Superman Theme
+description: Bold theme with red and yellow superhero-inspired accents
+---
+
+# Superman Theme
+
+The Superman theme brings bold, heroic energy to your desktop with its distinctive red and yellow color scheme inspired by the iconic superhero.
+
+<Card title="Theme Overview" icon="palette">
+  A dynamic theme featuring red (#f38ba8) foreground with yellow-cream (#f9e3af) accents on a dark background (#212121), capturing the bold aesthetic of the Man of Steel.
+</Card>
+
+## Color Scheme
+
+The Superman theme uses a vibrant color palette inspired by the classic superhero costume:
+
+### Primary Colors
+
+- **Background**: `#212121` - Charcoal gray
+- **Foreground**: `#f38ba8` - Vibrant red-pink
+- **Active/Selected**: `#f9e3af` - Warm yellow-cream
+- **Inactive**: `#45475a` - Muted gray
+
+### Waybar Colors
+
+- **Base**: `rgb(33, 33, 33)` - Dark charcoal background
+- **Mantle**: `#131313` - Deeper black layer
+- **Crust**: `#11111b` - Nearly black undertone
+- **Text**: `#f38ba8` - Red-pink text
+- **Mauve**: `#f9e3af` - Yellow-cream accent
+- **Sky**: `#89dceb` - Cyan for status indicators
+- **Red**: `#f38ba8` - Primary theme red
+- **Green**: `#a6e3a1` - Success indicator
+
+### Terminal Colors (Kitty)
+
+The terminal configuration balances the bold theme with readability:
+
+<Note>
+The terminal uses a more subdued blue-gray foreground (#a9b1d6) for general text to reduce eye strain, while the cursor features the signature yellow accent (#e0af68).
+</Note>
+
+**Core Terminal Colors**:
+- **Foreground**: `#a9b1d6` - Soft blue-gray text
+- **Background**: `#1a1b26` - Dark navy black
+- **Cursor**: `#e0af68` - Yellow cursor with underline
+- **Selection**: Blue text on dark background
+
+**ANSI Color Palette**:
+- Black: `#414868`
+- Red: `#f7768e`
+- Green: `#73daca`
+- Yellow: `#e0af68` - Superman yellow
+- Blue: `#7aa2f7`
+- Magenta: `#bb9af7`
+- Cyan: `#7dcfff`
+- White: `#c0caf5`
+
+## Theme Structure
+
+The Superman theme includes complete desktop configuration:
+
+### Directory Layout
+
+```
+themes/Superman/
+├── sway/
+│   └── theme.conf           # Window manager colors and borders
+├── waybar/
+│   ├── config.jsonc         # Status bar configuration
+│   ├── style.css            # Status bar styling
+│   └── colors.css           # Color definitions
+├── kitty/
+│   ├── kitty.conf           # Terminal settings
+│   └── colors.ini           # Terminal color palette
+├── rofi-style/
+│   ├── _core/
+│   │   └── palette.rasi     # Rofi color palette
+│   ├── themes-witcher.rasi  # Theme switcher menu
+│   ├── selector-app.rasi    # Application launcher
+│   └── power-menu.rasi      # Power menu styling
+└── wallpaper.jpg            # Theme wallpaper
+```
+
+### Sway Configuration
+
+The theme configures Sway with bold visual style:
+
+- **Border Width**: 2px borders for both normal and floating windows
+- **Gaps**: 5px inner gaps, 10px outer gaps
+- **Window Decorations**: Yellow-cream borders on focused windows, gray on inactive
+- **Visual Style**: Bold, attention-grabbing focused window indicators
+
+### Rofi Configuration
+
+<Info>
+Rofi menus feature the red and yellow color scheme using JetBrains Mono Nerd Font at 14pt, creating distinctive superhero-themed menus.
+</Info>
+
+## Activation
+
+Activate the Superman theme using the Config-Sway theme switcher:
+
+```bash
+# Using the theme switcher
+Super + Shift + T  # Opens theme selector
+# Select "Superman" from the menu
+```
+
+Or manually via command line:
+
+```bash
+~/.config/sway/scripts/theme-switcher.sh Superman
+```
+
+<Note>
+The bold color scheme applies immediately to window decorations and menus. Terminal applications should be restarted for the full color experience.
+</Note>
+
+## Customization
+
+Personalize the Superman theme:
+
+1. **Adjust Red/Yellow Balance**: Edit `~/.config/themes/Superman/sway/theme.conf` to modify the `$fg` (red) and `$active` (yellow) variables
+2. **Waybar Accents**: Customize `~/.config/themes/Superman/waybar/colors.css` for status bar appearance
+3. **Terminal Colors**: Modify `~/.config/themes/Superman/kitty/colors.ini` for terminal styling
+4. **Background Image**: Replace `~/.config/themes/Superman/wallpaper.jpg` with superhero-themed imagery
+5. **Border Intensity**: Adjust border colors if the yellow is too bright for your display
+
+<Card title="Bold Design" icon="bolt">
+  The Superman theme is designed to stand out with its vibrant color combination. It works best for users who appreciate bold visual statements and energetic aesthetics.
+</Card>
+
+## Visual Characteristics
+
+- **Aesthetic**: Bold, heroic, energetic, comic-inspired
+- **Contrast**: Very high contrast with warm accent colors
+- **Best For**: Creative work, energizing environment, making a statement
+- **Mood**: Confident, powerful, dynamic
+- **Eye Strain**: Moderate - bright accents may require adjustment period
+- **Visibility**: Excellent - easy to identify focused windows
+
+## Design Philosophy
+
+The Superman theme draws inspiration from:
+
+- Classic superhero color palettes (red, yellow, blue)
+- Comic book aesthetics with bold, high-contrast colors
+- Energetic and empowering visual design
+- Clear visual hierarchy through strong color differentiation
+
+## Use Cases
+
+The Superman theme is ideal for:
+
+- Users who want an energetic, motivating workspace
+- Creative professionals seeking visual inspiration
+- Standing out in screenshots and presentations
+- Making it easy to identify focused windows at a glance
+- Adding personality to your desktop environment
+
+<Note>
+The bold color scheme makes this theme particularly photogenic - great for sharing your desktop setup in communities or on social media.
+</Note>

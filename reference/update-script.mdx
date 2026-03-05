@@ -1,0 +1,253 @@
+---
+title: update.sh
+description: Synchronize Config-Sway dotfiles to your home directory
+---
+
+## Overview
+
+The `update.sh` script synchronizes your local configuration files from the Config-Sway repository to your home directory. It intelligently manages dotfiles in both `~/.config` and `~` directories, creating backups before applying changes and tracking which files are managed by the repository.
+
+<Warning>
+This script uses `rsync --delete` which will **remove files** in your config directories that are not present in the repository. Backups are created by default.
+</Warning>
+
+## Location
+
+```bash
+./update.sh
+```
+
+Located in the root directory of the Config-Sway repository.
+
+## Usage
+
+```bash
+./update.sh [OPTIONS]
+```
+
+### Options
+
+<ParamField path="--no-backup" type="flag">
+  Skip creating backup directories before synchronization. Use with caution.
+</ParamField>
+
+## What It Does
+
+### Step-by-Step Execution
+
+1. **Pre-flight Checks**
+   - Verifies `.config` directory exists in the repository
+   - Checks that `rsync` is installed
+   - Validates command-line options
+
+2. **Backup Creation** (unless `--no-backup` is specified)
+   - Creates timestamped backup: `~/.config.bak-YYYYMMDD-HHMMSS`
+   - Creates home dotfiles backup: `~/home-dots.bak-YYYYMMDD-HHMMSS`
+   - Backups are made before any changes are applied
+
+3. **~/.config Synchronization**
+   - Reads top-level directories/files from repository's `.config`
+   - Uses `rsync -a --delete` to sync each managed directory
+   - Creates tracking file: `~/.config/.config-sway-managed`
+   - Removes directories that were deleted from the repository
+
+4. **Home Directory Synchronization** (if `home/` exists)
+   - Syncs dotfiles from repository's `home/` directory to `~`
+   - Creates tracking file: `~/.home-dots-managed`
+   - Only affects files listed in the tracking file
+
+5. **Service Reloads**
+   - Restarts `xdg-desktop-portal` and `xdg-desktop-portal-wlr`
+   - Reloads Sway configuration with `swaymsg reload`
+   - Restarts Waybar with the new configuration
+
+### Synchronization Behavior
+
+The script uses `rsync -a --delete` which means:
+- **Archive mode** (`-a`): Preserves permissions, timestamps, symlinks, etc.
+- **Delete mode** (`--delete`): Removes files in destination not present in source
+- **Scoped deletion**: Only deletes within managed directories tracked by the script
+
+## Options Reference
+
+### --no-backup
+
+Skips the creation of backup directories. This makes the script run faster but removes the safety net.
+
+```bash
+./update.sh --no-backup
+```
+
+<Warning>
+**Use with caution!** Without backups, you cannot easily revert changes if something goes wrong.
+</Warning>
+
+## Managed Files Tracking
+
+The script maintains two tracking files:
+
+### ~/.config/.config-sway-managed
+Lists all top-level directories/files in `~/.config` managed by Config-Sway:
+```
+kitty
+rofi
+sway
+waybar
+...
+```
+
+### ~/.home-dots-managed
+Lists all dotfiles in `~` managed by Config-Sway:
+```
+.bashrc
+.zshrc
+...
+```
+
+Only files listed in these tracking files will be modified or deleted by the script.
+
+## Error Handling
+
+### Missing .config Directory
+```
+Error: No existe: /path/to/repo/.config
+```
+The repository's `.config` directory is required.
+
+### rsync Not Found
+```
+Error: Falta rsync. Instálalo (o ejecuta ./install.sh en Arch).
+```
+Install rsync or run `install.sh` on Arch Linux.
+
+### Unknown Option
+```
+Error: Opción desconocida: --invalid
+```
+Only `--no-backup` is supported.
+
+## Exit Codes
+
+- **0**: Success (all files synchronized)
+- **1**: Error (missing dependencies, invalid options, or synchronization failure)
+
+## Examples
+
+### Standard Update with Backup
+
+```bash
+cd ~/Config-Sway
+./update.sh
+```
+
+Output:
+```
+Backup: /home/user/.config -> /home/user/.config.bak-20260305-143022
+Sincronizando ~/.config (solo lo gestionado por el repo)...
+Backup de dotfiles de /home/user en: /home/user/home-dots.bak-20260305-143022
+Sincronizando dotfiles en ~ (solo lo gestionado por home/)...
+Update listo.
+```
+
+### Update Without Backup
+
+```bash
+./update.sh --no-backup
+```
+
+Output:
+```
+Sincronizando ~/.config (solo lo gestionado por el repo)...
+Sincronizando dotfiles en ~ (solo lo gestionado por home/)...
+Update listo.
+```
+
+### Restore from Backup
+
+If you need to restore from a backup:
+
+```bash
+# List available backups
+ls -ld ~/.config.bak-*
+
+# Restore from specific backup
+cp -a ~/.config.bak-20260305-143022 ~/.config
+```
+
+## Repository Structure
+
+The script expects this repository structure:
+
+```
+Config-Sway/
+├── .config/          # Config files to sync to ~/.config
+│   ├── sway/
+│   ├── waybar/
+│   ├── kitty/
+│   └── ...
+├── home/             # Optional: dotfiles to sync to ~
+│   ├── .bashrc
+│   ├── .zshrc
+│   └── ...
+├── install.sh
+└── update.sh
+```
+
+## Synchronized Directories
+
+Typically synchronized directories include:
+- `~/.config/sway` - Sway window manager configuration
+- `~/.config/waybar` - Waybar status bar configuration
+- `~/.config/kitty` - Kitty terminal configuration
+- `~/.config/rofi` - Rofi launcher configuration
+- `~/.config/mako` - Mako notification daemon configuration
+- `~/.config/ranger` - Ranger file manager configuration
+- `~/.config/scripts` - Custom utility scripts
+- `~/.config/themes` - Theme definitions
+- `~/.config/wallpapers` - Wallpaper collection
+
+## Service Reloads
+
+After synchronization, the script automatically reloads:
+
+### XDG Desktop Portals
+```bash
+systemctl --user restart xdg-desktop-portal xdg-desktop-portal-wlr
+```
+
+### Sway Window Manager
+```bash
+swaymsg reload
+```
+
+### Waybar Status Bar
+```bash
+killall waybar
+waybar -c ~/.config/waybar/config.jsonc &
+```
+
+## Related Scripts
+
+- [`install.sh`](/reference/install-script) - Install dependencies and run update.sh
+- [`theme-switcher.sh`](/reference/theme-switcher) - Apply theme configurations
+
+## Safety Features
+
+1. **Automatic Backups**: Creates timestamped backups before making changes
+2. **Scoped Deletion**: Only removes files explicitly managed by the repository
+3. **Tracking Files**: Maintains lists of managed files to prevent accidental deletion
+4. **Strict Error Handling**: Uses `set -euo pipefail` to catch errors early
+
+## Notes
+
+- The script can be run multiple times safely - it's idempotent
+- Backup directories accumulate over time; clean old backups manually
+- Only top-level directories in `.config` are synchronized individually
+- Files in `home/` must be at the first level (not nested)
+- The script automatically detects its location and can be run from any directory
+
+## Source Code
+
+View the full source: `update.sh` (141 lines)
+
+Author: Fravelz

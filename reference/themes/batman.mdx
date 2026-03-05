@@ -1,0 +1,140 @@
+---
+title: Batman Theme
+description: A sleek monochrome theme with minimalist gray and white accents
+---
+
+# Batman Theme
+
+The Batman theme delivers a sophisticated, minimalist aesthetic with its monochromatic color scheme featuring clean white accents on a dark gray background.
+
+<Card title="Theme Overview" icon="palette">
+  A professional dark theme emphasizing simplicity and elegance with white (#dfdfdf) accents against a charcoal background (#212121), perfect for distraction-free work.
+</Card>
+
+## Color Scheme
+
+The Batman theme uses a refined monochromatic palette:
+
+### Primary Colors
+
+- **Background**: `#212121` - Charcoal gray
+- **Foreground**: `#dfdfdf` - Light gray (nearly white)
+- **Active/Selected**: `#dfdfdf` - Bright white
+- **Inactive**: `#45475a` - Muted gray
+
+### Waybar Colors
+
+- **Base**: `rgb(33, 33, 33)` - Charcoal gray base
+- **Mantle**: `#131313` - Darker secondary layer
+- **Crust**: `#131313` - Deep black undertone
+- **Text**: `#dfdfdf` - Light gray text
+- **Mauve**: `#dfdfdf` - White accent
+- **Sky**: `#89dceb` - Subtle cyan (for status indicators)
+- **Red**: `#f38ba8` - Error/warning color
+- **Green**: `#a6e3a1` - Success indicator
+
+### Terminal Colors (Kitty)
+
+The Batman theme terminal configuration features:
+
+<Note>
+The terminal uses a modified palette with white foreground text on a dark background, maintaining the monochrome aesthetic.
+</Note>
+
+**Core Terminal Colors**:
+- **Foreground**: `#dfdfdf` - Light gray text
+- **Background**: `#1a1b26` - Deep navy black
+- **Cursor**: `#dfdfdf` with underline style
+- **Selection**: White text on dark background
+
+**ANSI Palette**:
+- Black: `#414868`
+- Red: `#f7768e`
+- Green: `#73daca`
+- Yellow: `#e0af68`
+- Blue: `#7aa2f7`
+- Magenta: `#bb9af7`
+- Cyan: `#7dcfff`
+- White: `#c0caf5`
+
+## Theme Structure
+
+The Batman theme includes configurations for all desktop components:
+
+### Directory Layout
+
+```
+themes/Batman/
+├── sway/
+│   └── theme.conf           # Window manager colors and borders
+├── waybar/
+│   ├── config.jsonc         # Status bar configuration
+│   ├── style.css            # Status bar styling
+│   └── colors.css           # Color definitions
+├── kitty/
+│   ├── kitty.conf           # Terminal settings
+│   └── colors.ini           # Terminal color palette
+├── rofi-style/
+│   ├── _core/
+│   │   └── palette.rasi     # Rofi color palette
+│   ├── theme-switcher.rasi  # Theme switcher menu
+│   ├── selector-app.rasi    # Application launcher
+│   └── power-menu.rasi      # Power menu styling
+└── wallpaper.jpg            # Theme wallpaper
+```
+
+### Sway Configuration
+
+The theme configures Sway with:
+
+- **Border Width**: 2px borders for both normal and floating windows
+- **Gaps**: 5px inner gaps, 10px outer gaps
+- **Window Decorations**: White borders on focused windows, gray on inactive
+- **Visual Style**: Clean, minimalist window decorations
+
+### Rofi Configuration
+
+<Info>
+Rofi menus use the JetBrains Mono Nerd Font at 14pt size with the monochrome color scheme for a cohesive appearance.
+</Info>
+
+## Activation
+
+Activate the Batman theme using the Config-Sway theme switcher:
+
+```bash
+# Using the theme switcher
+Super + Shift + T  # Opens theme selector
+# Select "Batman" from the menu
+```
+
+Or manually via command line:
+
+```bash
+~/.config/sway/scripts/theme-switcher.sh Batman
+```
+
+<Note>
+The theme will automatically reload Sway and apply to all configured components. Terminal applications require restart for full theme adoption.
+</Note>
+
+## Customization
+
+Customize the Batman theme to your preferences:
+
+1. **Adjust Brightness**: Edit `~/.config/themes/Batman/sway/theme.conf` to modify the `$fg` and `$active` variables
+2. **Waybar Appearance**: Customize `~/.config/themes/Batman/waybar/colors.css` for status bar styling
+3. **Terminal Colors**: Modify `~/.config/themes/Batman/kitty/colors.ini` for terminal appearance
+4. **Background Image**: Replace `~/.config/themes/Batman/wallpaper.jpg` with your preferred wallpaper
+
+<Card title="Design Philosophy" icon="paintbrush">
+  The Batman theme prioritizes clarity and focus through its monochromatic design, reducing visual distractions while maintaining excellent readability.
+</Card>
+
+## Visual Characteristics
+
+- **Aesthetic**: Minimalist, professional, monochrome
+- **Contrast**: High contrast with white on dark gray
+- **Best For**: Professional work, writing, coding
+- **Mood**: Focused, sophisticated, elegant
+- **Eye Strain**: Low eye strain due to neutral colors

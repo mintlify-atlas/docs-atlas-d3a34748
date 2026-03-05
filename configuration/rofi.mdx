@@ -1,0 +1,531 @@
+---
+title: 'Rofi Configuration'
+description: 'Application launcher, menus, and scripts for Rofi under Sway'
+icon: 'window-restore'
+---
+
+# Rofi Menus and Scripts
+
+Rofi provides all the interactive menus in Config-Sway, from application launching to theme switching. All menus are styled consistently and integrated with the theme system.
+
+## Directory Structure
+
+```
+~/.config/rofi/
+├── scripts/              # Executable menu scripts
+│   ├── selector-app.sh
+│   ├── power-menu.sh
+│   ├── theme-switcher.sh
+│   ├── wallpaper-switcher.sh
+│   └── menu-iconos.sh
+├── styles/               # Theme-specific styling
+│   ├── _core/           # Core theme files
+│   │   ├── palette.rasi # Color definitions
+│   │   ├── selector-app.rasi
+│   │   ├── power-menu.rasi
+│   │   ├── theme-switcher.rasi
+│   │   └── wallpaper-switcher.rasi
+│   ├── selector-app.rasi
+│   ├── power-menu.rasi
+│   ├── theme-switcher.rasi
+│   └── wallpaper-switcher.rasi
+└── images/              # Icons and backgrounds
+    ├── arch-linux.png
+    └── arch-linux-2.webp
+```
+
+## Rofi Scripts
+
+<Accordion title="Application Selector (Super + D)">
+
+### Script: `selector-app.sh`
+
+```bash ~/.config/rofi/scripts/selector-app.sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+CORE_THEME="$HOME/.config/rofi/styles/_core/selector-app.rasi"
+IMG="$HOME/.config/rofi/images/arch-linux.png"
+
+if [ -f "$IMG" ]; then
+  rofi -show drun -show-icons -theme "$CORE_THEME" \
+    -theme-str "imagebox { background-image: url(\"$IMG\", height); }"
+else
+  rofi -show drun -show-icons -theme "$CORE_THEME"
+fi
+```
+
+**Features:**
+- Shows all desktop applications (`.desktop` files)
+- Displays application icons
+- Background image overlay (if available)
+- Fuzzy search enabled
+
+**Keybinding:** `Super + D`
+
+<Tip>
+Type partial application names to quickly filter. For example, "fire" will show Firefox.
+</Tip>
+
+</Accordion>
+
+<Accordion title="Power Menu (Super + Q)">
+
+### Script: `power-menu.sh`
+
+```bash ~/.config/rofi/scripts/power-menu.sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+theme="$HOME/.config/rofi/styles/_core/power-menu.rasi"
+bg="$HOME/.config/rofi/images/arch-linux-2.webp"
+
+# System information
+lastlogin="$(
+  (last "$USER" 2>/dev/null || true) \
+    | head -n1 \
+    | tr -s ' ' \
+    | cut -d' ' -f5,6,7
+)"
+uptime="$(
+  (uptime -p 2>/dev/null || true) \
+    | sed -e 's/^up //g'
+)"
+host="$(hostname)"
+
+# Menu options
+apagar=' '
+reiniciar='󰦛 '
+bloquear='󱅞'
+suspender='󰽥'
+cerrar_seccion='󰍂 '
+cancelar=' '
+
+rofi_cmd() {
+  rofi -dmenu \
+    -p "$USER@$host" \
+    -mesg " Desde: $lastlogin, Tiempo encendido: $uptime" \
+    -theme "${theme}" \
+    -theme-str "inputbar { background-image: url(\"$bg\", width); }"
+}
+
+run_rofi() {
+  echo -e "$cancelar\n$apagar\n$reiniciar\n$suspender\n$cerrar_seccion\n$bloquear" | rofi_cmd
+}
+
+lock_now() {
+  if command -v swaylock >/dev/null 2>&1; then
+    swaylock -f
+  elif command -v loginctl >/dev/null 2>&1; then
+    loginctl lock-session
+  fi
+}
+
+logout_now() {
+  if command -v swaymsg >/dev/null 2>&1; then
+    swaymsg exit >/dev/null 2>&1 || true
+  fi
+}
+
+chosen="$(run_rofi)"
+case "${chosen}" in
+  "$apagar") systemctl poweroff ;;
+  "$reiniciar") systemctl reboot ;;
+  "$bloquear") lock_now ;;
+  "$suspender")
+    command -v mpc >/dev/null 2>&1 && mpc -q pause || true
+    systemctl suspend
+    ;;
+  "$cerrar_seccion") logout_now ;;
+  *) exit 0 ;;
+esac
+```
+
+**Menu Options:**
+
+| Icon | Action | Command |
+|------|--------|----------|
+|  | Shutdown | `systemctl poweroff` |
+| 󰦛 | Reboot | `systemctl reboot` |
+| 󱅞 | Lock screen | `swaylock -f` |
+| 󰽥 | Suspend | `systemctl suspend` |
+| 󰍂 | Logout | `swaymsg exit` |
+|  | Cancel | Exit menu |
+
+**Features:**
+- Shows last login time
+- Displays system uptime
+- Background image in header
+- Safe suspend (pauses music first)
+
+**Keybinding:** `Super + Q`
+
+<Warning>
+Shutdown and reboot actions execute immediately without confirmation. Use the cancel option if you change your mind.
+</Warning>
+
+</Accordion>
+
+<Accordion title="Theme Switcher (Super + A)">
+
+### Script: `theme-switcher.sh`
+
+The theme switcher is the most complex script, handling theme application across all components.
+
+```bash ~/.config/rofi/scripts/theme-switcher.sh
+TEMAS_DIR="$HOME/.config/themes"
+ROFI_THEME="$HOME/.config/rofi/styles/_core/theme-switcher.rasi"
+```
+
+**What it does:**
+
+1. **Lists available themes** from `~/.config/themes/`
+2. **Shows theme previews** using wallpaper images as icons
+3. **Applies selected theme** to:
+   - Kitty terminal colors
+   - Waybar colors and styles
+   - Sway window decorations
+   - Rofi color palette
+   - System wallpaper
+4. **Reloads all components** automatically
+
+**Theme Detection:**
+
+```bash
+for theme_dir in "$TEMAS_DIR"/*; do
+  [ -d "$theme_dir" ] || continue
+  theme_name="$(basename "$theme_dir")"
+
+  preview=""
+  for ext in jpg png webp; do
+    if [ -f "$theme_dir/wallpaper.$ext" ]; then
+      preview="$theme_dir/wallpaper.$ext"
+      break
+    fi
+  done
+
+  printf '%s\0icon\x1f%s\n' "$theme_name" "$preview" >> "$OPCIONES"
+done
+```
+
+**Component Updates:**
+
+```bash
+# Kitty
+if [ -d "$ELEGIDO/kitty" ]; then
+  backup_dir "$HOME/.config/kitty"
+  copy_dir_contents "$ELEGIDO/kitty" "$HOME/.config/kitty"
+fi
+
+# Waybar (adapted for Sway)
+if [ -f "$ELEGIDO/waybar/config.jsonc" ]; then
+  sed \
+    -e 's#hyprland/workspaces#sway/workspaces#g' \
+    -e 's#hyprland/window#sway/window#g' \
+    "$ELEGIDO/waybar/config.jsonc" > "$HOME/.config/waybar/config-sway.jsonc"
+fi
+
+# Sway theme
+if [ -f "$ELEGIDO/sway/theme.conf" ]; then
+  cp -a "$ELEGIDO/sway/theme.conf" "$HOME/.config/sway/theme.conf"
+fi
+
+# Wallpaper
+for ext in jpg png webp; do
+  if [ -f "$ELEGIDO/wallpaper.$ext" ]; then
+    WALL="$ELEGIDO/wallpaper.$ext"
+    break
+  fi
+done
+
+if [ -n "$WALL" ]; then
+  printf '%s\n' "$WALL" > "$SWAY_WALL_FILE"
+  killall swaybg 2>/dev/null || true
+  swaybg -i "$WALL" -m fill &
+fi
+
+# Reload components
+killall waybar 2>/dev/null || true
+waybar -c "$HOME/.config/waybar/config-sway.jsonc" & disown
+swaymsg reload
+```
+
+**Auto-generating Rofi Colors:**
+
+If a theme doesn't include a rofi palette, colors are extracted from Sway theme:
+
+```bash
+bg="$(awk '$1=="set" && $2=="$bg"{print $3; exit}' "$ELEGIDO/sway/theme.conf")"
+fg="$(awk '$1=="set" && $2=="$fg"{print $3; exit}' "$ELEGIDO/sway/theme.conf")"
+active="$(awk '$1=="set" && $2=="$active"{print $3; exit}' "$ELEGIDO/sway/theme.conf")"
+
+cat >"$rofi_palette" <<EOF
+* {
+    font:                  "JetBrains Mono Nerd Font 14";
+    background:            $bg;
+    background-alt:        $inactive;
+    foreground:            $fg;
+    selected:              $active;
+    active:                $active;
+    urgent:                $active;
+}
+EOF
+```
+
+**Keybinding:** `Super + A`
+
+<Note>
+The script creates `.bak-<timestamp>` backups before modifying configurations. Backups are stored alongside the original files.
+</Note>
+
+</Accordion>
+
+<Accordion title="Wallpaper Switcher (Super + W)">
+
+Similar to theme switcher, but only changes the wallpaper without modifying other theme components.
+
+**Keybinding:** `Super + W`
+
+</Accordion>
+
+<Accordion title="Icon Menu (Super + E)">
+
+### Script: `menu-iconos.sh`
+
+A custom icon-based menu. The exact functionality depends on your configuration.
+
+**Keybinding:** `Super + E`
+
+</Accordion>
+
+## Rofi Styling
+
+### Color Palette
+
+```rasi ~/.config/rofi/styles/_core/palette.rasi
+/* Paleta de colores (se actualiza al cambiar de tema) */
+
+* {
+    background:            #1e1e2e;
+    background-alt:        #242438;
+    foreground:            #89b3fa;
+    selected:              #89b3fa;
+    active:                #40392e;
+    urgent:                #312b26;
+}
+```
+
+This file is automatically updated by the theme switcher. All menu styles import this palette.
+
+### Menu-Specific Styles
+
+Each menu has two style files:
+
+1. **`styles/_core/<menu>.rasi`** - Core layout and structure
+2. **`styles/<menu>.rasi`** - Imports core + customizations
+
+<Note>
+The `_core/` directory contains the actual styling logic. Top-level `.rasi` files simply import from `_core/` and can add overrides.
+</Note>
+
+## Available Themes
+
+Config-Sway includes 6 pre-configured themes:
+
+| Theme Name | Style | Wallpaper |
+|------------|-------|------------|
+| **Anime** | Catppuccin-inspired dark theme | Anime artwork |
+| **Batman** | Dark gray and black | Batman logo |
+| **Hacker** | Matrix-style green on black | Hacker aesthetic |
+| **Mode-Dark** | Pure dark mode | Minimal dark |
+| **Superman** | Red and blue accents | Superman emblem |
+| **Windows10** | Windows-inspired | Windows 10 default |
+
+### Theme Structure
+
+Each theme directory contains:
+
+```
+~/.config/themes/<ThemeName>/
+├── kitty/
+│   └── kitty.conf       # Terminal colors
+├── waybar/
+│   ├── colors.css       # Waybar color variables
+│   ├── style.css        # Waybar styling
+│   └── config.jsonc     # Waybar layout (optional)
+├── sway/
+│   └── theme.conf       # Window borders, gaps, colors
+├── rofi-style/
+│   └── _core/
+│       └── palette.rasi # Rofi colors (optional)
+└── wallpaper.{jpg,png,webp}
+```
+
+<Tip>
+Create your own theme by copying an existing theme directory and modifying the files. Make sure to include a `wallpaper.jpg/png/webp` file!
+</Tip>
+
+## Creating Custom Menus
+
+### Basic Rofi Script Template
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Define theme
+THEME="$HOME/.config/rofi/styles/_core/your-menu.rasi"
+
+# Create menu options
+option1="Option 1"
+option2="Option 2"
+option3="Option 3"
+
+# Display menu
+chosen="$(echo -e "$option1\n$option2\n$option3" | rofi -dmenu -theme "$THEME")"
+
+# Handle selection
+case "$chosen" in
+  "$option1")
+    # Action for option 1
+    ;;
+  "$option2")
+    # Action for option 2
+    ;;
+  "$option3")
+    # Action for option 3
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+```
+
+### Adding Icons to Menu Items
+
+```bash
+option1=" Option 1"  # Nerd Font icon
+option2=" Option 2"
+option3=" Option 3"
+```
+
+### Using Images as Icons
+
+```bash
+printf '%s\0icon\x1f%s\n' "Item Name" "/path/to/icon.png"
+```
+
+## Rofi Configuration Tips
+
+<Accordion title="Custom keybindings in Rofi">
+
+Edit `~/.config/rofi/config.rasi` to add custom keybindings:
+
+```rasi
+configuration {
+  kb-mode-next: "Shift+Right,Control+Tab,Alt+l";
+  kb-mode-previous: "Shift+Left,Control+ISO_Left_Tab,Alt+h";
+  kb-row-up: "Up,Control+k";
+  kb-row-down: "Down,Control+j";
+}
+```
+
+</Accordion>
+
+<Accordion title="Adjusting window size">
+
+In your menu's `.rasi` file:
+
+```rasi
+window {
+    width: 600px;
+    height: 400px;
+}
+```
+
+Or use percentages:
+
+```rasi
+window {
+    width: 50%;
+    height: 60%;
+}
+```
+
+</Accordion>
+
+<Accordion title="Changing fonts">
+
+In `palette.rasi` or individual menu styles:
+
+```rasi
+* {
+    font: "JetBrains Mono Nerd Font 16";
+}
+```
+
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Rofi not showing icons">
+
+**Possible causes:**
+- Missing Nerd Fonts
+- `-show-icons` flag not set
+- GTK icon theme not installed
+
+**Solution:**
+```bash
+sudo pacman -S nerd-fonts ttf-font-awesome
+```
+
+Ensure script uses: `rofi -show drun -show-icons`
+
+</Accordion>
+
+<Accordion title="Theme colors not applying">
+
+1. Verify `palette.rasi` exists:
+```bash
+cat ~/.config/rofi/styles/_core/palette.rasi
+```
+
+2. Check for syntax errors:
+```bash
+rofi -dump-config > /tmp/rofi-test.rasi
+```
+
+3. Manually update palette by running theme switcher again
+
+</Accordion>
+
+<Accordion title="Script not executing">
+
+1. Ensure script is executable:
+```bash
+chmod +x ~/.config/rofi/scripts/your-script.sh
+```
+
+2. Check for errors:
+```bash
+bash -x ~/.config/rofi/scripts/your-script.sh
+```
+
+3. Verify shebang is correct: `#!/usr/bin/env bash`
+
+</Accordion>
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Sway Keybindings" icon="keyboard" href="/configuration/sway">
+    See all Rofi menu keybindings in Sway config
+  </Card>
+  <Card title="Theme System" icon="palette" href="/configuration/themes">
+    Understand how themes affect Rofi styling
+  </Card>
+  <Card title="Scripts" icon="code" href="/components/scripts">
+    Other utility scripts used by the system
+  </Card>
+</CardGroup>

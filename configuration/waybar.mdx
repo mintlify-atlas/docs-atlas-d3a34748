@@ -1,0 +1,576 @@
+---
+title: 'Waybar Configuration'
+description: 'Configure the status bar with modules, styling, and custom scripts'
+icon: 'chart-bar'
+---
+
+# Waybar Status Bar
+
+Waybar is the status bar used in Config-Sway, displaying system information, workspaces, and custom widgets. It's configured specifically for Sway with a modular design and theme integration.
+
+## Configuration Files
+
+Waybar uses three main configuration files:
+
+| File | Purpose | Location |
+|------|---------|----------|
+| `config.jsonc` | Main configuration with modules | `~/.config/waybar/` |
+| `style.css` | Visual styling and layout | `~/.config/waybar/` |
+| `colors.css` | Color definitions (Catppuccin-based) | `~/.config/waybar/` |
+
+<Note>
+The theme switcher generates `config-sway.jsonc` by adapting `config.jsonc` from theme directories, replacing Hyprland-specific modules with Sway equivalents.
+</Note>
+
+## Bar Configuration
+
+### Basic Settings
+
+```json ~/.config/waybar/config.jsonc
+{
+  "layer": "top",
+  "position": "top",
+  "height": 25,
+  "margin-left": 5,
+  "margin-right": 5,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "spacing": 1,
+  "reload_style_on_change": true
+}
+```
+
+- **Layer**: `top` - Appears above other windows
+- **Height**: 25px with 5px margins on three sides
+- **Auto-reload**: Style changes apply immediately
+
+## Module Layout
+
+<Accordion title="Module Organization">
+
+Waybar modules are organized into 7 groups:
+
+### Left Side Groups
+
+```json
+"modules-left": [  
+  "group/group-1",  // Arch logo + Workspaces
+  "group/group-2",  // Media controls (MPRIS)
+  "group/group-3"   // Package updates
+]
+```
+
+**Group 1** - System & Workspaces:
+```json
+"group/group-1": {
+  "modules": [ 
+    "custom/arch",
+    "sway/workspaces"
+  ]
+}
+```
+
+**Group 2** - Media Player:
+```json
+"group/group-2": {
+  "modules": [
+    "mpris",
+    "custom/previous",
+    "custom/pause",
+    "custom/next"
+  ]
+}
+```
+
+**Group 3** - Package Updates:
+```json
+"group/group-3": {
+  "modules": [
+    "custom/pacman",
+    "custom/pkg-aur"
+  ]
+}
+```
+
+### Center Group
+
+```json
+"modules-center": [ "group/group-4" ]  // Clock
+```
+
+### Right Side Groups
+
+```json
+"modules-right": [
+  "group/group-5",  // Bluetooth, Battery, Network
+  "group/group-6",  // Audio, Brightness
+  "group/group-7"   // CPU, Temperature, Disk, Memory
+]
+```
+
+</Accordion>
+
+## Core Modules
+
+<Accordion title="Sway Workspaces">
+
+```json ~/.config/waybar/config.jsonc
+"sway/workspaces": {
+  "on-click": "activate",
+  "activate-only": false,
+  "all-outputs": true,
+  "format": "{name}",
+  "format-icons": {
+    "1": "*", "2": "*", "3": "*", "4": "*", "5": "*", 
+    "6": "*", "7": "*", "8": "*", "9": "*", "10": "*",
+    "urgent": "*",
+    "active": "*",
+    "default": "*"
+  },
+  "persistent_workspaces": { "[]": 3 }
+}
+```
+
+- **Click to switch**: Clicking a workspace switches to it
+- **All outputs**: Shows workspaces from all monitors
+- **Persistent**: Always shows at least 3 workspaces
+
+</Accordion>
+
+<Accordion title="Window Title">
+
+```json
+"sway/window": {
+  "format": "{}",
+  "max-length": 18,
+  "separate-outputs": true
+}
+```
+
+Displays the title of the currently focused window, truncated to 18 characters.
+
+</Accordion>
+
+<Accordion title="Clock">
+
+```json
+"clock": {
+  "format": "{:%H:%M - %h %d}",
+  "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+  "format-alt": "{:%Y-%m-%d}"
+}
+```
+
+- **Primary format**: `14:30 - Mar 05`
+- **Tooltip**: Shows full calendar
+- **Click to toggle**: Switches to date format
+
+</Accordion>
+
+<Accordion title="System Monitoring">
+
+### CPU Usage
+
+```json
+"cpu": {
+  "interval": 2,
+  "format": " {usage:>2}% ",
+  "on-click": "kitty -e btop"
+}
+```
+
+### Memory Usage
+
+```json
+"memory": {
+  "interval": 2,
+  "format": " {:>2}%"
+}
+```
+
+### Disk Usage
+
+```json
+"disk": {
+  "interval": 15,
+  "format": "󰋊 {percentage_used:>2}% "
+}
+```
+
+### Temperature
+
+```json
+"temperature": {
+  "thermal-zone": 2,
+  "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+  "format-critical": "{temperatureC}°C {icon} ",
+  "critical-threshold": 80,
+  "interval": 2,
+  "format": " {temperatureC:>2}°C ",
+  "format-icons": ["0", "", ""],
+  "on-click": "kitty -e btop"
+}
+```
+
+<Tip>
+Click on CPU or temperature modules to open `btop` for detailed system monitoring.
+</Tip>
+
+</Accordion>
+
+<Accordion title="Network">
+
+```json
+"network": {
+  "interval": 3,
+  "format-wifi": " {bandwidthTotalBytes:>2}",
+  "format-ethernet": "󰌗 {ipaddr}", 
+  "format-linked": "󰌙 {ifname} (Sin IP)", 
+  "format-disconnected": "󰖪", 
+  "format-alt": "󰛳 {ifname}", 
+  "tooltip-format-wifi": " {bandwidthDownBytes}  {bandwidthUpBytes}", 
+  "tooltip-format-ethernet": "󰌗 {ifname} | IP: {ipaddr}/{cidr} | GW: {gwaddr}", 
+  "tooltip-format-disconnected": "󰖪 Disconnected",
+  "max-length": 30
+}
+```
+
+**Features:**
+- Real-time bandwidth monitoring
+- Different icons for WiFi/Ethernet/Disconnected
+- Tooltip shows detailed connection info
+
+</Accordion>
+
+<Accordion title="Audio (WirePlumber)">
+
+```json
+"wireplumber": {
+  "format": "{icon} {volume:>2}% ",
+  "format-muted": "󰖁 {volume:>2}% ",
+  "format-bluetooth": "{icon} {volume:>2}% 󰂯 ",
+  "format-bluetooth-muted": "󰖁 {icon} 󰂯 ",
+  "format-icons": ["", " ", " "],
+  "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+}
+```
+
+- **Click to mute/unmute**
+- Bluetooth indicator when using BT audio
+- Dynamic icon based on volume level
+
+</Accordion>
+
+<Accordion title="Backlight">
+
+```json
+"backlight": {
+  "format": "{icon} {percent:>3}%",
+  "format-icons": [
+    "", "", "", "", "", "", "", "", ""
+  ]
+}
+```
+
+Shows screen brightness with dynamic icons (9 levels).
+
+</Accordion>
+
+<Accordion title="Battery">
+
+```json
+"battery": {
+  "states": {
+    "good": 95,
+    "warning": 30,
+    "critical": 15
+  },
+  "format": "{icon} {capacity}% ",
+  "format-full": "{icon} ",
+  "format-plugged": " {capacity}% <span font='Font Awesome 5 Free'>\uf0e7</span> ",
+  "format-alt": "{icon} ",
+  "tooltip-format": "{capacity}%, about {time} left",
+  "format-icons": [" ", " ", " ", " "]
+}
+```
+
+**States:**
+- **Good**: Above 95%
+- **Warning**: Below 30% (changes color)
+- **Critical**: Below 15% (animated alert)
+
+</Accordion>
+
+<Accordion title="Bluetooth">
+
+```json
+"bluetooth": {
+  "format": "{icon}",
+  "format-icons": ["󰂯 ", "󰤾 ", "󰥀 ", "󰥄 ", "󰥈 "],
+  "tooltip-format-off": "Bluetooth is off",
+  "tooltip-format-on": "Bluetooth is on",
+  "format-connected": "{icon} {num_connections}",
+  "format-connected-battery": "{icon} {device_battery_percentage}%",
+  "tooltip-format-connected": "{device_enumerate}",
+  "tooltip-format-enumerate-connected": "{device_alias}\t{device_battery_percentage}%",
+  "on-click": "blueman-manager"
+}
+```
+
+- Click to open Bluetooth manager
+- Shows battery level for connected devices
+- Signal strength indicators
+
+</Accordion>
+
+## Custom Modules
+
+<Accordion title="Media Controls (MPRIS)">
+
+### MPRIS Player Status
+
+```json
+"mpris": {
+  "format": "{player_icon} {title} - {artist} ",
+  "format-paused": "{status_icon} {title} - {artist}",
+  "player-icons": {
+    "default": "<span foreground='#cba6f7'>󰝚 </span>",
+    "spotify": "<span foreground='#a6e3a1'>󰓇 </span>",
+    "firefox": "<span foreground='#f38ba8'>󰗃 </span>"
+  },
+  "status-icons": {
+    "paused": "<span color='#b4befe'>\u200A\u200A󰏤\u2009\u2009</span>"
+  },
+  "tooltip-format": "Playing: {title} - {artist}",
+  "min-length": 5,
+  "max-length": 15
+}
+```
+
+### Custom Media Buttons
+
+```json
+"custom/previous": {
+  "format": "󰙣",
+  "on-click": "playerctl --player=spotify previous && playerctl --player=youtube-music previous",
+  "tooltip": false
+},
+"custom/pause": {
+  "format": "{icon}",
+  "on-click": "playerctl --player=spotify play-pause",
+  "tooltip": false,
+  "format-icons": [ "", "" ]
+},
+"custom/next": {
+  "format": "󰙡 ",
+  "on-click": "playerctl --player=spotify next && playerctl --player=youtube-music next",
+  "tooltip": false
+}
+```
+
+Provides previous/play-pause/next controls for Spotify and YouTube Music.
+
+</Accordion>
+
+<Accordion title="Package Updates">
+
+### Official Repository Updates
+
+```json
+"custom/pacman": {
+  "format": "  {}",
+  "interval": 3600,
+  "exec": "checkupdates | wc -l",
+  "exec-if": "exit 0",
+  "on-click": "foot -e 'sudo pacman -Syu'; pkill ZepNet-SIGRTMIN+8 waybar",
+  "signal": 8
+}
+```
+
+### AUR Updates
+
+```json
+"custom/pkg-aur": {
+  "exec": "yay -Qua | wc -l",
+  "interval": 1800,
+  "format": "󰏔 {}",
+  "tooltip": true,
+  "tooltip-format": "AUR packages"
+}
+```
+
+- **Pacman**: Checks every hour, click to update
+- **AUR**: Checks every 30 minutes
+
+</Accordion>
+
+<Accordion title="Arch Linux Icon">
+
+```json
+"custom/arch": {
+  "format": "{icon}",
+  "format-icons": " ",
+  "exec-on-event": "true",
+  "tooltip-format": "Arch Linux"
+}
+```
+
+A simple branding element showing the Arch logo.
+
+</Accordion>
+
+## Styling
+
+### Color Scheme
+
+```css ~/.config/waybar/colors.css
+@define-color mauve #a6dcf7;
+@define-color text #cdd6f4;
+@define-color base rgba(30, 30, 46, 1);
+@define-color mantle #181825;
+@define-color crust #11111b;
+@define-color red #f38ba8;
+@define-color green #a6e3a1;
+@define-color sky #89dceb;
+```
+
+Based on Catppuccin Mocha palette. The `colors.css` file is updated by the theme switcher.
+
+### Module Styling
+
+```css ~/.config/waybar/style.css
+#waybar .module {
+  color: @text;
+  padding: 0px 0px;
+  padding-left: 2px;
+  margin: -10px 5px -10px;
+  border: 2px;
+}
+
+#waybar .module:hover {
+  color: @mauve;
+  background-color: @base;
+}
+```
+
+### Grouped Modules
+
+```css
+#group-10, #group-9, #group-8, #group-7, #group-6, 
+#group-5,  #group-4, #group-3, #group-2, #group-1 {
+  padding: 0px 10px;
+  margin: 0px 5px;
+  background: @mantle;
+  border: 2px solid @mauve;
+  border-radius: 9999px;
+}
+```
+
+Each group has rounded borders and consistent spacing.
+
+### Workspace Buttons
+
+```css
+#workspaces button {
+  border-radius: 9999px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: @text;
+}
+
+#workspaces button.active {
+  background: @mauve;
+  color: @crust;
+  border-radius: 9999px;
+  transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#workspaces button:hover {
+  background: @mantle;
+  color: @text;
+  transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+}
+```
+
+<Tip>
+Workspace buttons use smooth cubic-bezier transitions for an elegant visual effect.
+</Tip>
+
+## Custom Scripts
+
+Waybar includes several helper scripts:
+
+| Script | Purpose | Location |
+|--------|---------|----------|
+| `ip.sh` | Get IP address | `~/.config/waybar/ip.sh` |
+| `vpn-status.sh` | Check VPN connection | `~/.config/waybar/vpn-status.sh` |
+| `target.sh` | HackTheBox target info | `~/.config/waybar/target.sh` |
+
+## Theme Integration
+
+When switching themes with `Super + A`:
+
+1. **Colors are copied** from `<theme>/waybar/colors.css`
+2. **Styles are copied** from `<theme>/waybar/style.css`
+3. **Config is adapted** - Hyprland modules replaced with Sway equivalents:
+   - `hyprland/workspaces` → `sway/workspaces`
+   - `hyprland/window` → `sway/window`
+4. **Waybar is reloaded** automatically
+
+<Note>
+The theme switcher creates `config-sway.jsonc` specifically for Sway. The original `config.jsonc` may reference Hyprland modules.
+</Note>
+
+## Troubleshooting
+
+<Accordion title="Waybar not starting">
+
+Check the systemd journal:
+```bash
+journalctl --user -xeu waybar
+```
+
+Common issues:
+- Missing `config-sway.jsonc` (run theme switcher)
+- Syntax errors in JSON (use `jsonlint` to validate)
+- Missing fonts (install JetBrains Mono Nerd Font)
+
+</Accordion>
+
+<Accordion title="Modules not updating">
+
+- Check `interval` settings in config
+- Verify required programs are installed:
+  - `wireplumber` for audio
+  - `playerctl` for media controls
+  - `brightnessctl` for backlight
+  - `checkupdates` and `yay` for package updates
+
+</Accordion>
+
+<Accordion title="Styling not applying">
+
+1. Check CSS syntax:
+```bash
+stylelint ~/.config/waybar/style.css
+```
+
+2. Force reload:
+```bash
+killall waybar && waybar -c ~/.config/waybar/config-sway.jsonc &
+```
+
+3. Verify `reload_style_on_change` is `true` in config
+
+</Accordion>
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Sway Configuration" icon="window" href="/configuration/sway">
+    Window manager keybindings and settings
+  </Card>
+  <Card title="Theme System" icon="palette" href="/configuration/themes">
+    How themes update Waybar colors and styles
+  </Card>
+</CardGroup>
