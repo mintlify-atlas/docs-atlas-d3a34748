@@ -1,0 +1,104 @@
+{
+  "projectType": "general",
+  "projectName": "Config-Sway",
+  "projectDescription": "Sway dotfiles configuration with Hyprland-style keybindings, multi-theme support, and integrated Waybar, Rofi, and SDDM theming for Arch Linux.",
+  "theme": "aspen",
+  "primaryColor": "#7aa2f7",
+  "lightColor": "#bb9af7",
+  "darkColor": "#414868",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/sway",
+              "configuration/waybar",
+              "configuration/rofi",
+              "configuration/themes",
+              "configuration/kitty",
+              "configuration/neovim"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/keybindings",
+              "guides/theme-switching",
+              "guides/wallpaper-management",
+              "guides/customization",
+              "guides/troubleshooting"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/sddm-theme",
+              "components/scripts",
+              "components/rofi-menus"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Scripts",
+            "pages": [
+              "reference/install-script",
+              "reference/update-script",
+              "reference/theme-switcher",
+              "reference/wallpaper-switcher"
+            ]
+          },
+          {
+            "group": "Themes",
+            "pages": [
+              "reference/themes/anime",
+              "reference/themes/batman",
+              "reference/themes/hacker",
+              "reference/themes/mode-dark",
+              "reference/themes/superman",
+              "reference/themes/windows10"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Hyprland-style keybindings for Sway WM",
+    "Six pre-configured themes with consistent styling",
+    "Rofi-based app launcher and power menu",
+    "Waybar status bar with Sway integration",
+    "Automated dotfile installation and synchronization",
+    "Custom SDDM astronaut login theme",
+    "Theme switcher with live reload support",
+    "Wallpaper management system",
+    "Multimedia key support (volume, brightness, playback)",
+    "Virtual keyboard support for SDDM"
+  ],
+  "publicApiSurface": [
+    "install.sh - Arch Linux package installer",
+    "update.sh - Dotfile synchronization script",
+    "~/.config/rofi/scripts/selector-app.sh - App launcher",
+    "~/.config/rofi/scripts/power-menu.sh - Power management menu",
+    "~/.config/rofi/scripts/theme-switcher.sh - Theme selector",
+    "~/.config/rofi/scripts/wallpaper-switcher.sh - Wallpaper selector",
+    "~/.config/rofi/scripts/menu-iconos.sh - Emoji/icon menu",
+    "~/.config/scripts/mode-hacker.sh - Hacker layout mode",
+    "~/.config/scripts/setwallpaper.sh - Wallpaper setter",
+    "~/.config/scripts/autostart.sh - Autostart script"
+  ]
+}
